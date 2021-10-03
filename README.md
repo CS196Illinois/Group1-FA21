@@ -5,4 +5,4 @@ Group Name: TEAM_NAME
 
 Team Members: tc37, haozhen6, ky18, minyuc2, qizheng9
 
-Project Manager: PM_NETID
+Project Manager: afei3
