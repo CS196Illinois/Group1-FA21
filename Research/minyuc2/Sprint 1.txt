@@ -1,0 +1,8 @@
+1. Learning how to use Git and Github by watching tutorials: 
+- https://www.youtube.com/watch?v=OcESHUakJy4
+- https://www.youtube.com/watch?v=nhNq2kIvi9s
+2. Learning how to use Cocos Creator:
+- https://www.youtube.com/watch?v=JSOXYPqZ1-8&list=PLbvpmJKjO3NA4dlW43GzhJUMaXyIp3xpc
+- https://github.com/cocos-creator/example-cases.git
+3. Read the game plot written by Qizheng Sun
+4. Learned coding style of JavaScript and Cocos Creator by reading and running Tianyue Cao's test code about movement system
