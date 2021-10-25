@@ -2,6 +2,9 @@
 import * as cc from 'cc';
 const { ccclass, property } = cc._decorator;
 
+import { LoadSceneEvent } from './events/LoadSceneEvent';
+import * as e from './events/EventManager';
+
 /**
  * Predefined variables
  * Name = PlayerController
@@ -24,39 +27,39 @@ export class PlayerController extends cc.Component {
     // serializableDummy = 0;
 
     // useful components
-    rigidBody: cc.RigidBody2D;
-    collider: cc.Collider2D;
-    uiTransform: cc.UITransform;
+    private rigidBody: cc.RigidBody2D;
+    private collider: cc.Collider2D;
+    private uiTransform: cc.UITransform;
 
     // detect movement command
-    moveLeft: boolean;
-    moveRight: boolean;
-    jump: boolean;
+    private moveLeft: boolean;
+    private moveRight: boolean;
+    private jump: boolean;
 
     // number of consecutive jumps (while in air)
-    curJumpNum: number;
-    maxJumpNum: number;
+    private curJumpNum: number;
+    private maxJumpNum: number;
 
     // drop
-    isDropping: boolean;
+    private isDropping: boolean;
 
     // sprint
-    allowSprint: boolean;
-    sprintStep: number;
-    curSprintTime: number;
-    maxSprintTime: number;
+    private allowSprint: boolean;
+    private sprintStep: number;
+    private curSprintTime: number;
+    private maxSprintTime: number;
 
     // speed of movement
-    horizontalStep: number;
-    verticalStep: number;
-    verticalMaxStep: number;
+    private horizontalStep: number;
+    private verticalStep: number;
+    private verticalMaxStep: number;
 
     // keyboard configurations
-    keyUp: cc.KeyCode;
-    keyDown: cc.KeyCode;
-    keyLeft: cc.KeyCode;
-    keyRight: cc.KeyCode;
-    keySprint: cc.KeyCode;
+    private keyUp: cc.KeyCode;
+    private keyDown: cc.KeyCode;
+    private keyLeft: cc.KeyCode;
+    private keyRight: cc.KeyCode;
+    private keySprint: cc.KeyCode;
 
     onLoad () {
         // initializations
@@ -100,6 +103,14 @@ export class PlayerController extends cc.Component {
 
     onKeyDown (event: cc.EventKeyboard) {
         switch (event.keyCode) {
+            // if a number is pressed, emit a LoadSceneEvent to switch to the corresponding scene
+            case cc.KeyCode.DIGIT_1:
+            case cc.KeyCode.DIGIT_2:
+                console.log("Enter");
+                var number = event.keyCode + 1 - cc.KeyCode.DIGIT_1;
+                console.log("scene" + number)
+                e.EventManager.instance.emit("LoadScene", new LoadSceneEvent("scene" + number));
+                break;
             case this.keyUp:
                 this.jump = true;
                 break;
