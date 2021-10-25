@@ -2,7 +2,7 @@
 import * as cc from 'cc';
 const { ccclass, property } = cc._decorator;
 
-import { LoadSceneEvent } from './events/LoadSceneEvent';
+import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 import * as e from './events/EventManager';
 
 /**
@@ -32,8 +32,17 @@ export class GameManager extends cc.Component {
     }
 
     loadScene(event: LoadSceneEvent) {
-        console.log("Loading Scene: " + event.name);
-        cc.director.loadScene(event.name);
+        // event type can be either load scene or preload scene
+        switch (event.type) {
+            case LoadSceneEventType.LOAD_SCENE:
+                console.log("Loading Scene: " + event.scene);
+                cc.director.loadScene(event.scene);
+                break;
+            case LoadSceneEventType.PRELOAD_SCENE:
+                console.log("Preloading Scene: " + event.scene);
+                cc.director.preloadScene(event.scene);
+                break;
+        }
     }
 }
 

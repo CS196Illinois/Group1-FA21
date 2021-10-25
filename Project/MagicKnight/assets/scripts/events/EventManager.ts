@@ -15,13 +15,16 @@ const { ccclass, property } = cc._decorator;
  */
 
 export class EventManager {
-    private static _instance = new EventManager();  // singleton
-    public static get instance() { return EventManager._instance; }
+    // singleton instance
+    private static _instance = new EventManager();
+    public static get instance(): EventManager { return EventManager._instance; }
 
+    // event listeners are saved here
     private listeners: { [key: string]: Array<(event: BaseEvent) => void> } = {};
 
     private constructor() {}
 
+    // add an event listener
     public on(tag: string, listener: (event: BaseEvent) => void) {
         if (this.listeners[tag] == null) {
             this.listeners[tag] = [];
@@ -29,6 +32,7 @@ export class EventManager {
         this.listeners[tag].push(listener);
     }
 
+    // remove an event listener
     public off(tag: string, listener: (event: BaseEvent) => void) {
         if (this.listeners[tag] == null) return;
         this.listeners[tag].forEach((element, index) => {
@@ -36,6 +40,7 @@ export class EventManager {
         });
     }
 
+    // notify all listeners under the tag and pass the event as the argument
     public emit(tag: string, event: BaseEvent) {
         if (this.listeners[tag] == null) return;
         this.listeners[tag].forEach(listener => {
@@ -44,12 +49,13 @@ export class EventManager {
     }
 }
 
+// All custom events should extend the BaseEvent class
 export class BaseEvent {
-    private _name: string;
-    public get name(): string { return this._name; }
+    private _type: string;
+    public get type(): string { return this._type; }
 
-    constructor(name: string) {
-        this._name = name;
+    constructor(type: string) {
+        this._type = type;
     }
 }
 

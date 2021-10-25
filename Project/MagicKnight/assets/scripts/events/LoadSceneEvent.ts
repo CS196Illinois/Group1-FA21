@@ -16,11 +16,22 @@ import * as e from './EventManager';
  *
  */
 
-@ccclass("LoadSceneEvent")
+// LoadSceneEvent is for loading or preloading a scene
 export class LoadSceneEvent extends e.BaseEvent {
-    constructor(name: string) {
-        super(name);
+    // self defined properties
+    private _scene: string;
+    public get scene(): string { return this._scene; }
+
+    constructor(type: LoadSceneEventType, scene: string) {
+        // name is a property of BaseEvent
+        super(type);
+        this._scene = scene;
     }
+}
+
+export enum LoadSceneEventType {
+    LOAD_SCENE = "load-scene",
+    PRELOAD_SCENE = "preload-scene",
 }
 
 /**

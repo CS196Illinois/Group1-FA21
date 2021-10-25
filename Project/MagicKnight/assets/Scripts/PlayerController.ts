@@ -2,7 +2,7 @@
 import * as cc from 'cc';
 const { ccclass, property } = cc._decorator;
 
-import { LoadSceneEvent } from './events/LoadSceneEvent';
+import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 import * as e from './events/EventManager';
 
 /**
@@ -106,10 +106,12 @@ export class PlayerController extends cc.Component {
             // if a number is pressed, emit a LoadSceneEvent to switch to the corresponding scene
             case cc.KeyCode.DIGIT_1:
             case cc.KeyCode.DIGIT_2:
-                console.log("Enter");
+                // find the number pressed
                 var number = event.keyCode + 1 - cc.KeyCode.DIGIT_1;
-                console.log("scene" + number)
-                e.EventManager.instance.emit("LoadScene", new LoadSceneEvent("scene" + number));
+                // example of how to emit a LoadSceneEvent
+                e.EventManager.instance.emit("LoadScene", new LoadSceneEvent(
+                    LoadSceneEventType.LOAD_SCENE, "scene" + number
+                ));
                 break;
             case this.keyUp:
                 this.jump = true;
