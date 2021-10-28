@@ -2,6 +2,9 @@
 import * as cc from 'cc';
 const { ccclass, property } = cc._decorator;
 
+import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
+import * as e from './events/EventManager';
+
 /**
  * Predefined variables
  * Name = GameManager
@@ -24,27 +27,23 @@ export class GameManager extends cc.Component {
     // serializableDummy = 0;
 
     onLoad() {
-        cc.PhysicsSystem2D.instance.enable = true;
-        cc.PhysicsSystem2D.instance.debugDrawFlags = cc.EPhysics2DDrawFlags.None;
-        cc.PhysicsSystem2D.instance.debugDrawFlags = cc.EPhysics2DDrawFlags.Aabb |
-            cc.EPhysics2DDrawFlags.Pair |
-            cc.EPhysics2DDrawFlags.CenterOfMass |
-            cc.EPhysics2DDrawFlags.Joint |
-            cc.EPhysics2DDrawFlags.Shape;
-        // cc.PhysicsSystem2D.instance.debugDrawFlags = cc.EPhysics2DDrawFlags.Aabb |
-        //     cc.EPhysics2DDrawFlags.Pair |
-        //     cc.EPhysics2DDrawFlags.CenterOfMass |
-        //     cc.EPhysics2DDrawFlags.Joint |
-        //     cc.EPhysics2DDrawFlags.Shape;
+        cc.game.addPersistRootNode(this.node);
+        e.EventManager.instance.on("LoadScene", this.loadScene);
     }
 
-    start () {
-        // [3]
+    loadScene(event: LoadSceneEvent) {
+        // event type can be either load scene or preload scene
+        switch (event.type) {
+            case LoadSceneEventType.LOAD_SCENE:
+                console.log("Loading Scene: " + event.scene);
+                cc.director.loadScene(event.scene);
+                break;
+            case LoadSceneEventType.PRELOAD_SCENE:
+                console.log("Preloading Scene: " + event.scene);
+                cc.director.preloadScene(event.scene);
+                break;
+        }
     }
-
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
 }
 
 /**
