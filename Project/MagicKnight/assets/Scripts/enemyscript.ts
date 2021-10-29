@@ -45,6 +45,8 @@ export class Enemyscript extends Component {
 
     }
 
+
+
     start () {
         // [3]
 
@@ -56,7 +58,6 @@ export class Enemyscript extends Component {
     //     // [4]
         let velocity: Vec2 = this.rigidBody.linearVelocity;
         let playerwidth: number = this.player.getComponent(UITransform).contentSize.width;
-        console.log(playerwidth);
         let enemywidth: number = this.uiTransform.contentSize.width;
         let distancebetween: number = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
         if (distancebetween > this.maxDistance) {
