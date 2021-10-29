@@ -26,6 +26,9 @@ export class PlayerController extends cc.Component {
     // @property
     // serializableDummy = 0;
 
+    // child node 
+    private weapon: cc.Node;
+
     // useful components
     private rigidBody: cc.RigidBody2D;
     private collider: cc.Collider2D;
@@ -35,6 +38,7 @@ export class PlayerController extends cc.Component {
     private moveLeft: boolean;
     private moveRight: boolean;
     private jump: boolean;
+    private facingright: boolean;
 
     // number of consecutive jumps (while in air)
     private curJumpNum: number;
@@ -49,6 +53,17 @@ export class PlayerController extends cc.Component {
     private curSprintTime: number;
     private maxSprintTime: number;
 
+    //attack
+    private allowAttack: boolean;
+    private rotateStep: number;
+    private initialRotation: number;
+    private curAttackTime: number;
+    private maxAttackTime: number;
+
+    //weapom position
+    private weaponRightX: number;
+    private weaponY: number;
+
     // speed of movement
     private horizontalStep: number;
     private verticalStep: number;
@@ -60,9 +75,11 @@ export class PlayerController extends cc.Component {
     private keyLeft: cc.KeyCode;
     private keyRight: cc.KeyCode;
     private keySprint: cc.KeyCode;
+    private keyAttack: cc.KeyCode;
 
     onLoad () {
         // initializations
+        this.weapon = this.node.getChildByName("weapon");
         this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
         this.uiTransform = this.getComponent(cc.UITransform);
@@ -70,6 +87,7 @@ export class PlayerController extends cc.Component {
         this.moveLeft = false;
         this.moveRight = false;
         this.jump = false;
+        this.facingright = true;
 
         this.curJumpNum = 0;
         this.maxJumpNum = 1;
@@ -81,6 +99,15 @@ export class PlayerController extends cc.Component {
         this.curSprintTime = 0;
         this.maxSprintTime = 0.15;
 
+        this.allowAttack = true;
+        this.rotateStep = -30;
+        this.initialRotation = -25;
+        this.curAttackTime = 0;
+        this.maxAttackTime = 0.15;
+
+        this.weaponRightX = 40;
+        this.weaponY = 30;
+
         this.horizontalStep = 10;
         this.verticalStep = 30;
         this.verticalMaxStep = 100;
@@ -90,6 +117,7 @@ export class PlayerController extends cc.Component {
         this.keyLeft = cc.KeyCode.KEY_A;
         this.keyRight = cc.KeyCode.KEY_D;
         this.keySprint = cc.KeyCode.SHIFT_LEFT;
+        this.keyAttack = cc.KeyCode.KEY_J;
     }
 
     start () {
@@ -98,7 +126,9 @@ export class PlayerController extends cc.Component {
         // add a key up listener
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         // add a collision listener (invoke callback after collision is solved)
-        cc.PhysicsSystem2D.instance.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
+        if (this.collider) {
+            this.collider.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
+        }
     }
 
     onKeyDown (event: cc.EventKeyboard) {
@@ -121,9 +151,11 @@ export class PlayerController extends cc.Component {
                 break;
             case this.keyLeft:
                 this.moveLeft = true;
+                this.facingright = false;
                 break;
             case this.keyRight:
                 this.moveRight = true;
+                this.facingright = true;
                 break;
             case this.keySprint:
                 if (!this.allowSprint) {
@@ -134,6 +166,13 @@ export class PlayerController extends cc.Component {
                     this.curSprintTime = this.maxSprintTime;
                 }
                 break;
+            case this.keyAttack:
+                if(!this.allowAttack) {
+                    break;
+                }
+                if (this.curAttackTime == 0)  {
+                    this.curAttackTime = this.maxAttackTime;
+                }
         }
     }
 
@@ -149,13 +188,12 @@ export class PlayerController extends cc.Component {
     }
 
     // this function is a previous version of onPostSolve that only works with box colliders
-    onPostSolve (otherCollider: cc.Collider2D, selfCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
+    onPostSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         this.isDropping = false;
         // get the bottom coordinate of the player and the top coordinate of the collider
-        var selfBottom = this.node.position.y - this.uiTransform.contentSize.y * this.uiTransform.anchorY;
+        var selfBottom = this.node.position.y - this.uiTransform.contentSize.y * this.uiTransform.anchorY + 1;
         var otherUITransform = otherCollider.getComponent(cc.UITransform);
         var otherTop = otherCollider.node.position.y + otherUITransform.contentSize.y * (1 - otherUITransform.anchorY);
-
         // if the bottom of the player is larger than the collider, that means the player is on top of the collider
         // therefore the number of air jumps should be reset to maximum
         if (selfBottom > otherTop) {
@@ -164,6 +202,22 @@ export class PlayerController extends cc.Component {
     }
 
     update (deltaTime: number) {
+        if (this.facingright) {
+            this.weapon.setPosition(this.weaponRightX, this.weaponY);
+        } else {
+            this.weapon.setPosition(this.uiTransform.contentSize.width - this.weaponRightX, this.weaponY);
+        }
+        // attack
+        if (this.curAttackTime > 0) {
+            if (this.facingright) this.weapon.getComponent(cc.RigidBody2D).angularVelocity = this.rotateStep;
+            if (!this.facingright) this.weapon.getComponent(cc.RigidBody2D).angularVelocity = -this.rotateStep;
+            this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
+        } else {
+            this.weapon.getComponent(cc.RigidBody2D).angularVelocity = 0;
+            if (this.facingright) this.weapon.setRotationFromEuler(0, 0, this.initialRotation);
+            if (!this.facingright) this.weapon.setRotationFromEuler(0, 0, -this.initialRotation);
+        }
+
         var velocity: cc.Vec2 = null;
         if (this.curSprintTime > 0) {
             // if is currently sprinting then set velocity to sprint velocity with the same direction as current movement
