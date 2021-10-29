@@ -1,5 +1,6 @@
 
 import { _decorator, Component, Node, PhysicsSystem2D, Contact2DType, Collider2D, IPhysics2DContact, UITransform, RigidBody2D } from 'cc';
+import { PlayerController } from './PlayerController';
 const { ccclass, property } = _decorator;
 
 /**
@@ -54,7 +55,7 @@ export class WeaponScript extends Component {
     }
 
     update (deltaTime: number) {
-        
+
     }
 }
 
