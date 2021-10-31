@@ -1,6 +1,8 @@
 
 import { _decorator, Component, Node, Prefab, instantiate, Button, Label, EventHandler, find, game } from 'cc';
 import { DataCenter } from './DataCenter';
+import { EventManager } from './events/EventManager';
+import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 const { ccclass, property } = _decorator;
 
 /**
@@ -27,6 +29,7 @@ function createNewGameMenu(): MenuItem[] {
         type: info.used ? "used-slot" : "new-slot",
         callback: () => {
             DataCenter.setUseSlot(info.number)
+            EventManager.instance.emit("LoadScene", new LoadSceneEvent(LoadSceneEventType.LOAD_SCENE, "scene1"))
         }
     }))
     return newGameMenu
