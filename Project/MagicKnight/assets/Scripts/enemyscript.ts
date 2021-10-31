@@ -1,21 +1,21 @@
 
-import { _decorator, Component, Node, RigidBody2D, Collider2D, UITransform, PhysicsSystem2D, Contact2DType, Vec2 } from 'cc';
-const { ccclass, property } = _decorator;
+import * as cc from 'cc';
+const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables
- * Name = Enemyscript
+ * Name = EnemyScript
  * DateTime = Sat Oct 16 2021 18:26:35 GMT-0500 (北美中部夏令时间)
  * Author = Kaicheng
- * FileBasename = enemyscript.ts
- * FileBasenameNoExtension = enemyscript
- * URL = db://assets/script/enemyscript.ts
+ * FileBasename = EnemyScript.ts
+ * FileBasenameNoExtension = EnemyScript
+ * URL = db://assets/script/EnemyScript.ts
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
  
-@ccclass('Enemyscript')
-export class Enemyscript extends Component {
+@ccclass('EnemyScript')
+export class EnemyScript extends cc.Component {
     // [1]
     // dummy = '';
 
@@ -23,41 +23,33 @@ export class Enemyscript extends Component {
     // @property
     // serializableDummy = 0;
 
-    @property({ type: Node })
     player = null;
 
     horizontalStep: number;
     maxDistance: number;
 
-
-    rigidBody: RigidBody2D;
-    collider: Collider2D;
-    uiTransform: UITransform;
+    rigidBody: cc.RigidBody2D;
+    collider: cc.Collider2D;
+    uiTransform: cc.UITransform;
 
     onLoad() {
+        this.player = cc.find("Canvas/Map/Player");
+
         this.horizontalStep = 4;
         this.maxDistance = 60;
 
-        this.rigidBody = this.getComponent(RigidBody2D);
-        this.collider = this.getComponent(Collider2D);
-        this.uiTransform = this.getComponent(UITransform);
-
-
+        this.rigidBody = this.getComponent(cc.RigidBody2D);
+        this.collider = this.getComponent(cc.Collider2D);
+        this.uiTransform = this.getComponent(cc.UITransform);
     }
-
-
 
     start () {
         // [3]
-
     }
 
-
-
     update (deltaTime: number) {
-    //     // [4]
-        let velocity: Vec2 = this.rigidBody.linearVelocity;
-        let playerwidth: number = this.player.getComponent(UITransform).contentSize.width;
+        let velocity: cc.Vec2 = this.rigidBody.linearVelocity;
+        let playerwidth: number = this.player.getComponent(cc.UITransform).contentSize.width;
         let enemywidth: number = this.uiTransform.contentSize.width;
         let distancebetween: number = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
         if (distancebetween > this.maxDistance) {
@@ -68,7 +60,6 @@ export class Enemyscript extends Component {
             velocity.x = 0;
         }
         this.rigidBody.linearVelocity = velocity;
-
     }
 }
 
