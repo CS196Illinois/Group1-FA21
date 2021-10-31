@@ -33,7 +33,7 @@ export class CameraMovement extends cc.Component {
         //set the vertical range of camera
         target_position.y = cc.misc.clampf(target_position.y, 200 , 300);
         //set the horizontal range of camera
-        target_position.x = cc.misc.clampf(target_position.x, -1000 , 1000);
+        target_position.x = cc.misc.clampf(target_position.x, -1000 , 1400);
         let current_position = this.node.getPosition();
         // let target = target_position;
         // let current = current_position;
