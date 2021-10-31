@@ -77,6 +77,10 @@ export class PlayerController extends cc.Component {
     private keySprint: cc.KeyCode;
     private keyAttack: cc.KeyCode;
 
+    getCurAttackTime () {
+        return this.curAttackTime;
+    }
+
     onLoad () {
         // initializations
         this.weapon = this.node.getChildByName("weapon");
