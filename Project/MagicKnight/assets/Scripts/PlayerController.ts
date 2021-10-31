@@ -32,13 +32,17 @@ export class PlayerController extends cc.Component {
     // useful components
     private rigidBody: cc.RigidBody2D;
     private collider: cc.Collider2D;
-    private uiTransform: cc.UITransform;
+    private _uiTransform: cc.UITransform;
+    public get uiTransform(): cc.UITransform { return this._uiTransform; }
+    private set uiTransform(value: cc.UITransform) { this._uiTransform = value; }
 
     // detect movement command
     private moveLeft: boolean;
     private moveRight: boolean;
     private jump: boolean;
-    private facingright: boolean;
+    private _facingright: boolean;
+    public get facingright(): boolean { return this._facingright }
+    private set facingright(value: boolean) { this._facingright = value; }
 
     // number of consecutive jumps (while in air)
     private curJumpNum: number;
@@ -53,17 +57,6 @@ export class PlayerController extends cc.Component {
     private curSprintTime: number;
     private maxSprintTime: number;
 
-    //attack
-    private allowAttack: boolean;
-    private rotateStep: number;
-    private initialRotation: number;
-    private curAttackTime: number;
-    private maxAttackTime: number;
-
-    //weapom position
-    private weaponRightX: number;
-    private weaponY: number;
-
     // speed of movement
     private horizontalStep: number;
     private verticalStep: number;
@@ -75,18 +68,13 @@ export class PlayerController extends cc.Component {
     private keyLeft: cc.KeyCode;
     private keyRight: cc.KeyCode;
     private keySprint: cc.KeyCode;
-    private keyAttack: cc.KeyCode;
-
-    getCurAttackTime () {
-        return this.curAttackTime;
-    }
 
     onLoad () {
         // initializations
         this.weapon = this.node.getChildByName("weapon");
         this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
-        this.uiTransform = this.getComponent(cc.UITransform);
+        this._uiTransform = this.getComponent(cc.UITransform);
 
         this.moveLeft = false;
         this.moveRight = false;
@@ -103,15 +91,6 @@ export class PlayerController extends cc.Component {
         this.curSprintTime = 0;
         this.maxSprintTime = 0.15;
 
-        this.allowAttack = true;
-        this.rotateStep = -30;
-        this.initialRotation = -25;
-        this.curAttackTime = 0;
-        this.maxAttackTime = 0.15;
-
-        this.weaponRightX = 40;
-        this.weaponY = 30;
-
         this.horizontalStep = 10;
         this.verticalStep = 30;
         this.verticalMaxStep = 100;
@@ -121,7 +100,6 @@ export class PlayerController extends cc.Component {
         this.keyLeft = cc.KeyCode.KEY_A;
         this.keyRight = cc.KeyCode.KEY_D;
         this.keySprint = cc.KeyCode.SHIFT_LEFT;
-        this.keyAttack = cc.KeyCode.KEY_J;
     }
 
     start () {
@@ -144,7 +122,7 @@ export class PlayerController extends cc.Component {
                 var number = event.keyCode + 1 - cc.KeyCode.DIGIT_1;
                 // example of how to emit a LoadSceneEvent
                 e.EventManager.instance.emit("LoadScene", new LoadSceneEvent(
-                    LoadSceneEventType.LOAD_SCENE, "scene" + number
+                    LoadSceneEventType.LOAD_SCENE, "Scene" + number
                 ));
                 break;
             case this.keyUp:
@@ -170,13 +148,6 @@ export class PlayerController extends cc.Component {
                     this.curSprintTime = this.maxSprintTime;
                 }
                 break;
-            case this.keyAttack:
-                if(!this.allowAttack) {
-                    break;
-                }
-                if (this.curAttackTime == 0)  {
-                    this.curAttackTime = this.maxAttackTime;
-                }
         }
     }
 
@@ -206,22 +177,6 @@ export class PlayerController extends cc.Component {
     }
 
     update (deltaTime: number) {
-        if (this.facingright) {
-            this.weapon.setPosition(this.weaponRightX, this.weaponY);
-        } else {
-            this.weapon.setPosition(this.uiTransform.contentSize.width - this.weaponRightX, this.weaponY);
-        }
-        // attack
-        if (this.curAttackTime > 0) {
-            if (this.facingright) this.weapon.getComponent(cc.RigidBody2D).angularVelocity = this.rotateStep;
-            if (!this.facingright) this.weapon.getComponent(cc.RigidBody2D).angularVelocity = -this.rotateStep;
-            this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
-        } else {
-            this.weapon.getComponent(cc.RigidBody2D).angularVelocity = 0;
-            if (this.facingright) this.weapon.setRotationFromEuler(0, 0, this.initialRotation);
-            if (!this.facingright) this.weapon.setRotationFromEuler(0, 0, -this.initialRotation);
-        }
-
         var velocity: cc.Vec2 = null;
         if (this.curSprintTime > 0) {
             // if is currently sprinting then set velocity to sprint velocity with the same direction as current movement
