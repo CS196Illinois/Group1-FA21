@@ -40,6 +40,11 @@ export class WeaponScript extends cc.Component {
     private curAttackTime: number;
     private maxAttackTime: number;
 
+    // Apply force to enemy
+    maxForceTime: number;
+    curForceTime: number;
+    objectForced: cc.Node;
+
     // weapom position
     private weaponRightX: number;
     private weaponY: number;
@@ -63,6 +68,10 @@ export class WeaponScript extends cc.Component {
         this.curAttackTime = 0;
         this.maxAttackTime = 0.15;
 
+        this.curForceTime = 0;
+        this.maxForceTime = 0.3;
+        this.objectForced = null;
+
         this.weaponRightX = 40;
         this.weaponY = 30;
 
@@ -71,7 +80,7 @@ export class WeaponScript extends cc.Component {
 
     start () {
         if (this.collider) {
-            this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.begineContact, this);
+            this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.preSolve, this);
         }
         // add a key down listener (when a key is pressed the function this.onKeyDown will be called)
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
@@ -90,9 +99,12 @@ export class WeaponScript extends cc.Component {
         }
     }
 
-    begineContact (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
+    preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         console.log(selfCollider.node, otherCollider.node);
-        this.isCollide = true;
+        if (otherCollider.node.name == "Enemy" && this.curAttackTime > 0) {
+            this.objectForced = otherCollider.node;
+            this.curForceTime = this.maxForceTime;
+        }
     }
 
     update (deltaTime: number) {
@@ -112,6 +124,15 @@ export class WeaponScript extends cc.Component {
             this.rigidBody.angularVelocity = 0;
             if (this.playerController.facingright) this.node.setRotationFromEuler(0, 0, this.initialRotation);
             if (!this.playerController.facingright) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
+        }
+
+        // apply force
+        if (this.curForceTime > 0) {
+            let direction = this.objectForced.position.x > this.node.parent.position.x ? 1 : -1;
+            this.objectForced.getComponent(cc.RigidBody2D).applyForceToCenter(new cc.Vec2(2000 * direction, 0), true);
+            this.curForceTime -= deltaTime;
+        } else {
+            this.curForceTime = 0;
         }
     }
 }

@@ -63,7 +63,7 @@ export class Enemyscript extends Component {
         if (distancebetween > this.maxDistance) {
             velocity.x = this.horizontalStep;
         } else if (distancebetween < -this.maxDistance) {
-            velocity.x = - this.horizontalStep;
+            velocity.x = -this.horizontalStep;
         } else {
             velocity.x = 0;
         }
