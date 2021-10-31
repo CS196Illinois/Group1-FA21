@@ -20,16 +20,9 @@ export class CameraMovement extends cc.Component {
     @property (cc.Node)
     Player_Node: cc.Node;
     
-    // static lerp<Out extends cc.IVec3Like> (out: Out, a: Out, b: Out, t: number) {
-    //     out.x = a.x + t * (b.x - a.x);
-    //     out.y = a.y + t * (b.y - a.y);
-    //     out.z = a.z + t * (b.z - a.z);
-    //     return out;
-    // } 
-    
     static lerp (to: cc.Vec3, ratio: number, here: cc.Vec3) {
-        here.x += ratio * (to.x - here.x);
-        here.y += ratio * (to.y - here.y);
+        here.x += ratio * (to.x - here.x - 600);
+        here.y += ratio * (to.y - here.y - 200);
         //here.z += ratio * (to.z - here.z);
         return here;
     }
@@ -38,25 +31,20 @@ export class CameraMovement extends cc.Component {
         
         let target_position = this.Player_Node.getPosition();
         //set the vertical range of camera
-        target_position.y = cc.misc.clampf(target_position.y,0,100);
+        target_position.y = cc.misc.clampf(target_position.y, 200 , 300);
         //set the horizontal range of camera
         target_position.x = cc.misc.clampf(target_position.x, -1000 , 1000);
         let current_position = this.node.getPosition();
-        let target = target_position;
-        let current = current_position;
+        // let target = target_position;
+        // let current = current_position;
         
-        cc.log(current);
+        cc.log(current_position);
         
         //make the camera move towards player's position at a ratio 0.03
-        if (target != current) {
-            this.node.setPosition(CameraMovement.lerp( target , 0.1 , current ));
+        if (target_position != current_position) {
+            this.node.setPosition(CameraMovement.lerp( target_position , 0.1 , current_position ));
         }
         
-        //current_position.y = cc.misc.clampf(target_position.y,0,100);
-        
-        // let w_pos = this.Player_Node.convertToWorldSpaceAR(cc.v2(0, 0));
-        // let c_pos = this.node.parent.convertToNodeSpaceAR(w_pos);
-        // this.node.position = c_pos;// c_pos;
     }
     
 }
