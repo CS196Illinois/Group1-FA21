@@ -4,6 +4,7 @@ const { ccclass, property } = cc._decorator;
 
 import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 import * as e from './events/EventManager';
+import { DataCenter } from './DataCenter';
 
 /**
  * Predefined variables
@@ -37,6 +38,7 @@ export class GameManager extends cc.Component {
             case LoadSceneEventType.LOAD_SCENE:
                 console.log("Loading Scene: " + event.scene);
                 cc.director.loadScene(event.scene);
+                DataCenter.setGameData("scene", event.scene);
                 break;
             case LoadSceneEventType.PRELOAD_SCENE:
                 console.log("Preloading Scene: " + event.scene);

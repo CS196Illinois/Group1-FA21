@@ -100,7 +100,6 @@ export class WeaponScript extends cc.Component {
     }
 
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
-        console.log(selfCollider.node, otherCollider.node);
         if (otherCollider.node.name == "Enemy" && this.curAttackTime > 0) {
             this.objectForced = otherCollider.node;
             this.curForceTime = this.maxForceTime;
