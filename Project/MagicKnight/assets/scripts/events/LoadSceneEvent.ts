@@ -31,6 +31,7 @@ export class LoadSceneEvent extends e.BaseEvent {
 
 export enum LoadSceneEventType {
     LOAD_SCENE = "load-scene",
+    LOAD_GAME_SCENE = "load-game-scene",
     PRELOAD_SCENE = "preload-scene",
 }
 

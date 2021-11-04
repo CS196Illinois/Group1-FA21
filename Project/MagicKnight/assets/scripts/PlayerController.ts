@@ -100,6 +100,11 @@ export class PlayerController extends cc.Component {
         this.keyLeft = cc.KeyCode.KEY_A;
         this.keyRight = cc.KeyCode.KEY_D;
         this.keySprint = cc.KeyCode.SHIFT_LEFT;
+
+        console.log(this.node.getComponent(cc.Collider2D));
+        console.log(this.node.getComponent(cc.RigidBody2D));
+        console.log(cc.find("Canvas/Map/Terrain/Ground").getComponent(cc.Collider2D));
+        console.log(cc.find("Canvas/Map/Terrain/Ground").getComponent(cc.RigidBody2D));
     }
 
     start () {
@@ -122,7 +127,7 @@ export class PlayerController extends cc.Component {
                 var number = event.keyCode + 1 - cc.KeyCode.DIGIT_1;
                 // example of how to emit a LoadSceneEvent
                 e.EventManager.instance.emit("LoadScene", new LoadSceneEvent(
-                    LoadSceneEventType.LOAD_SCENE, "Scene" + number
+                    LoadSceneEventType.LOAD_GAME_SCENE, "Scene" + number
                 ));
                 break;
             case this.keyUp:

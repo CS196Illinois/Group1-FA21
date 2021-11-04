@@ -5,6 +5,8 @@ const { ccclass, property } = cc._decorator;
 import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 import * as e from './events/EventManager';
 import { DataCenter } from './DataCenter';
+import { PlayerController } from './PlayerController';
+import { EnemyScript } from './EnemyScript';
 
 /**
  * Predefined variables
@@ -27,9 +29,17 @@ export class GameManager extends cc.Component {
     // @property
     // serializableDummy = 0;
 
+    // prefabs
+    private weapon: cc.Prefab;
+
     onLoad() {
         cc.game.addPersistRootNode(this.node);
-        e.EventManager.instance.on("LoadScene", this.loadScene);
+        e.EventManager.instance.on("LoadScene", (event: LoadSceneEvent) => { this.loadScene(event) });
+        cc.resources.load("prefabs/Weapon", cc.Prefab, (err, weapon) => {
+            this.weapon = weapon;
+            this.weapon.name = "weapon";
+            console.log(this.weapon);
+        });
     }
 
     loadScene(event: LoadSceneEvent) {
@@ -38,13 +48,69 @@ export class GameManager extends cc.Component {
             case LoadSceneEventType.LOAD_SCENE:
                 console.log("Loading Scene: " + event.scene);
                 cc.director.loadScene(event.scene);
+                break;
+            case LoadSceneEventType.LOAD_GAME_SCENE:
+                console.log("Loading Game Scene: " + event.scene);
+                cc.director.loadScene(event.scene);
                 DataCenter.setGameData("scene", event.scene);
+                // wait for everything to be loaded
+                setTimeout(() => this.setupGameScene(), 100);
                 break;
             case LoadSceneEventType.PRELOAD_SCENE:
                 console.log("Preloading Scene: " + event.scene);
                 cc.director.preloadScene(event.scene);
                 break;
         }
+    }
+
+    // This function will be called if the scene is a game scene
+    // It adds necessary components to existing nodes based on their names and positions
+    setupGameScene() {
+        let map = cc.find("Canvas/Map");
+        let player = map.getChildByName("Player");
+        let terrain = map.getChildByName("Terrain");
+        let enemy = map.getChildByName("Enemy");
+        let npc = map.getChildByName("NPC");
+
+        // common configurations
+        [player].concat(terrain.children, enemy.children, npc.children).forEach(node => {
+            // RigidBody2D
+            let rigidBody = node.addComponent(cc.RigidBody2D);
+            rigidBody.enabledContactListener = true;
+            rigidBody.type = cc.ERigidBody2DType.Dynamic;
+            rigidBody.gravityScale = 10;
+            rigidBody.fixedRotation = true;
+        });
+        [player].concat(terrain.children, enemy.children, npc.children).forEach(node => {
+            // BoxCollider2D
+            let boxCollider = node.addComponent(cc.BoxCollider2D);
+            let size = node.getComponent(cc.UITransform).contentSize;
+            boxCollider.friction = 0;
+            boxCollider.size = size.clone();
+            console.log(boxCollider.size);
+            boxCollider.offset = new cc.Vec2(size.width / 2, size.height / 2);
+            // apply all changes (cocos does not say this in the documentation, wasting me 2 hours debugging)
+            boxCollider.apply();
+        });
+
+        // specific configurations for player
+        player.addChild(cc.instantiate(this.weapon));
+        player.addComponent(PlayerController);
+
+        // specific configurations for terrain
+        terrain.children.forEach(node => {
+            let rigidBody = node.getComponent(cc.RigidBody2D);
+            rigidBody.type = cc.ERigidBody2DType.Static;
+            rigidBody.gravityScale = 0;
+        });
+
+        // specific configurations for characters
+        enemy.children.forEach(node => {
+            node.addComponent(EnemyScript);
+        });
+
+        // specific configurations for npc
+        npc.children.forEach(node => {});
     }
 }
 

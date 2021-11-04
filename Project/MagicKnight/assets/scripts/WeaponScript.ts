@@ -56,7 +56,6 @@ export class WeaponScript extends cc.Component {
         this.collider = this.getComponent(cc.Collider2D);
         this.uiTransform = this.getComponent(cc.UITransform);
         this.player = this.node.getParent();
-        this.playerController = this.player.getComponent(PlayerController);
 
         this.maxRotateTime = 0.2;
         this.curRotateTime = 0;
@@ -79,6 +78,7 @@ export class WeaponScript extends cc.Component {
     }
 
     start () {
+        this.playerController = this.player.getComponent(PlayerController);
         if (this.collider) {
             this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.preSolve, this);
         }

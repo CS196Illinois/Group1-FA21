@@ -38,7 +38,7 @@ export class CameraMovement extends cc.Component {
         // let target = target_position;
         // let current = current_position;
         
-        cc.log(current_position);
+        // cc.log(current_position);
         
         //make the camera move towards player's position at a ratio 0.03
         if (target_position != current_position) {

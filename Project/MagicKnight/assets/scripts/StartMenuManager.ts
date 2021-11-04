@@ -29,7 +29,7 @@ function createNewGameMenu(): MenuItem[] {
         type: info.used ? "used-slot" : "new-slot",
         callback: () => {
             DataCenter.setUseSlot(info.number)
-            EventManager.instance.emit("LoadScene", new LoadSceneEvent(LoadSceneEventType.LOAD_SCENE, "Scene1"))
+            EventManager.instance.emit("LoadScene", new LoadSceneEvent(LoadSceneEventType.LOAD_GAME_SCENE, "Scene1"))
         }
     }))
     return newGameMenu
