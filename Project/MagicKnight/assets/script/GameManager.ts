@@ -38,7 +38,6 @@ export class GameManager extends cc.Component {
         cc.resources.load("prefabs/Weapon", cc.Prefab, (err, weapon) => {
             this.weapon = weapon;
             this.weapon.name = "weapon";
-            console.log(this.weapon);
         });
     }
 
@@ -51,10 +50,8 @@ export class GameManager extends cc.Component {
                 break;
             case LoadSceneEventType.LOAD_GAME_SCENE:
                 console.log("Loading Game Scene: " + event.scene);
-                cc.director.loadScene(event.scene);
+                cc.director.loadScene(event.scene, () => this.setupGameScene());
                 DataCenter.setGameData("scene", event.scene);
-                // wait for everything to be loaded
-                setTimeout(() => this.setupGameScene(), 100);
                 break;
             case LoadSceneEventType.PRELOAD_SCENE:
                 console.log("Preloading Scene: " + event.scene);
@@ -87,7 +84,6 @@ export class GameManager extends cc.Component {
             let size = node.getComponent(cc.UITransform).contentSize;
             boxCollider.friction = 0;
             boxCollider.size = size.clone();
-            console.log(boxCollider.size);
             boxCollider.offset = new cc.Vec2(size.width / 2, size.height / 2);
             // apply all changes (cocos does not say this in the documentation, wasting me 2 hours debugging)
             boxCollider.apply();

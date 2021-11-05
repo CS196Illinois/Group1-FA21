@@ -100,11 +100,6 @@ export class PlayerController extends cc.Component {
         this.keyLeft = cc.KeyCode.KEY_A;
         this.keyRight = cc.KeyCode.KEY_D;
         this.keySprint = cc.KeyCode.SHIFT_LEFT;
-
-        console.log(this.node.getComponent(cc.Collider2D));
-        console.log(this.node.getComponent(cc.RigidBody2D));
-        console.log(cc.find("Canvas/Map/Terrain/Ground").getComponent(cc.Collider2D));
-        console.log(cc.find("Canvas/Map/Terrain/Ground").getComponent(cc.RigidBody2D));
     }
 
     start () {
