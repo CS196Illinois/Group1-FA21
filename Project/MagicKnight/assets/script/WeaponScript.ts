@@ -81,6 +81,7 @@ export class WeaponScript extends cc.Component {
         this.playerController = this.player.getComponent(PlayerController);
         if (this.collider) {
             this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.preSolve, this);
+            this.collider.on(cc.Contact2DType.END_CONTACT, this.preSolve, this);
         }
         // add a key down listener (when a key is pressed the function this.onKeyDown will be called)
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
@@ -107,6 +108,14 @@ export class WeaponScript extends cc.Component {
     }
 
     update (deltaTime: number) {
+        // enable collider when attacking
+        if (this.curAttackTime > 0) {
+            this.collider.enabled = true;
+        } else {
+            this.collider.enabled = false;
+        }
+        this.collider.apply();
+
         // follow player
         if (this.playerController.facingright) {
             this.node.setPosition(this.weaponRightX, this.weaponY);
