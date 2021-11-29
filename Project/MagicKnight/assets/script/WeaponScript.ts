@@ -1,6 +1,7 @@
 
 import * as cc from 'cc';
 import { PlayerController } from './PlayerController';
+import { SlimeScript } from './SlimeScript';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -101,9 +102,12 @@ export class WeaponScript extends cc.Component {
     }
 
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
-        if (otherCollider.node.name == "Enemy" && this.curAttackTime > 0) {
+        if (otherCollider.node.getParent().getParent().name == "Enemy" && this.curAttackTime > 0) {
             this.objectForced = otherCollider.node;
             this.curForceTime = this.maxForceTime;
+            if (otherCollider.node.getParent().name = "Slime") {
+                otherCollider.node.getComponent(SlimeScript).reSetcurCBtime();
+            }
         }
     }
 
