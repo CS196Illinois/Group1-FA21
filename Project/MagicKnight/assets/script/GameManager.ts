@@ -6,7 +6,8 @@ import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 import * as e from './events/EventManager';
 import { DataCenter } from './DataCenter';
 import { PlayerController } from './PlayerController';
-import { EnemyScript } from './EnemyScript';
+import { SlimeScript } from './SlimeScript';
+import { SoldierScript } from './SoldierScript';
 
 /**
  * Predefined variables
@@ -68,17 +69,17 @@ export class GameManager extends cc.Component {
         let terrain = map.getChildByName("Terrain");
         let enemy = map.getChildByName("Enemy");
         let npc = map.getChildByName("NPC");
+        let slime = enemy.getChildByName("Slime");
+        let soldier = enemy.getChildByName("Soldier");
 
         // common configurations
-        [player].concat(terrain.children, enemy.children, npc.children).forEach(node => {
+        [player].concat(terrain.children, soldier.children, slime.children, npc.children).forEach(node => {
             // RigidBody2D
             let rigidBody = node.addComponent(cc.RigidBody2D);
             rigidBody.enabledContactListener = true;
             rigidBody.type = cc.ERigidBody2DType.Dynamic;
             rigidBody.gravityScale = 10;
             rigidBody.fixedRotation = true;
-        });
-        [player].concat(terrain.children, enemy.children, npc.children).forEach(node => {
             // BoxCollider2D
             let boxCollider = node.addComponent(cc.BoxCollider2D);
             let size = node.getComponent(cc.UITransform).contentSize;
@@ -101,9 +102,13 @@ export class GameManager extends cc.Component {
         });
 
         // specific configurations for characters
-        enemy.children.forEach(node => {
-            node.addComponent(EnemyScript);
+        slime.children.forEach(node => {
+            node.addComponent(SlimeScript);
         });
+
+        soldier.children.forEach(node => {
+            node.addComponent(SoldierScript);
+        })
 
         // specific configurations for npc
         npc.children.forEach(node => {});

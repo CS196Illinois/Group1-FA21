@@ -1,21 +1,20 @@
 
 import * as cc from 'cc';
 const { ccclass, property } = cc._decorator;
-
 /**
  * Predefined variables
- * Name = EnemyScript
- * DateTime = Sat Oct 16 2021 18:26:35 GMT-0500 (北美中部夏令时间)
+ * Name = SoldierScript
+ * DateTime = Sun Nov 28 2021 18:49:45 GMT-0600 (北美中部标准时间)
  * Author = Kaicheng
- * FileBasename = EnemyScript.ts
- * FileBasenameNoExtension = EnemyScript
- * URL = db://assets/script/EnemyScript.ts
+ * FileBasename = SoldierScript.ts
+ * FileBasenameNoExtension = SoldierScript
+ * URL = db://assets/script/SoldierScript.ts
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
  
-@ccclass('EnemyScript')
-export class EnemyScript extends cc.Component {
+@ccclass('SoldierScript')
+export class SoldierScript extends cc.Component {
     // [1]
     // dummy = '';
 
@@ -62,7 +61,6 @@ export class EnemyScript extends cc.Component {
         this.rigidBody.linearVelocity = velocity;
     }
 }
-
 /**
  * [1] Class member could be defined like this.
  * [2] Use `property` decorator if your want the member to be serializable.
