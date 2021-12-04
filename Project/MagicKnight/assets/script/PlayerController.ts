@@ -4,6 +4,8 @@ const { ccclass, property } = cc._decorator;
 
 import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 import * as e from './events/EventManager';
+import { Backpack } from './BackpackController';
+import { Weapon } from './Item';
 
 /**
  * Predefined variables
@@ -19,16 +21,6 @@ import * as e from './events/EventManager';
  
 @ccclass('PlayerController')
 export class PlayerController extends cc.Component {
-    // [1]
-    // dummy = '';
-
-    // [2]
-    // @property
-    // serializableDummy = 0;
-
-    // child node 
-    private weapon: cc.Node;
-
     // useful components
     private rigidBody: cc.RigidBody2D;
     private collider: cc.Collider2D;
@@ -69,9 +61,16 @@ export class PlayerController extends cc.Component {
     private keyRight: cc.KeyCode;
     private keySprint: cc.KeyCode;
 
+    // backpack
+    private _backpack: Backpack;
+    public get backpack(): Backpack { return this._backpack; }
+    private set backpack(value: Backpack) { this._backpack = value; }
+
+    // weapon
+    private weapon: cc.Node;
+
     onLoad () {
         // initializations
-        this.weapon = this.node.getChildByName("weapon");
         this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
         this._uiTransform = this.getComponent(cc.UITransform);
@@ -100,6 +99,18 @@ export class PlayerController extends cc.Component {
         this.keyLeft = cc.KeyCode.KEY_A;
         this.keyRight = cc.KeyCode.KEY_D;
         this.keySprint = cc.KeyCode.SHIFT_LEFT;
+
+        // backpack
+        this.backpack = new Backpack();
+        this.backpack.loadItems();
+
+        // weapon
+        let weaponItem = new Weapon("weapon", "Weapon");  // TODO: use weapon info from the data center
+        cc.resources.load("prefabs/" + weaponItem.prefab, cc.Prefab, (err, weapon) => {
+            weapon.name = weaponItem.name;
+            this.weapon = cc.instantiate(weapon);
+            this.node.addChild(this.weapon);
+        });
     }
 
     start () {
