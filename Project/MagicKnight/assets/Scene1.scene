@@ -229,7 +229,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 517.8042959427207,
+    "_orthoHeight": 370.65963060686016,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -21885,7 +21885,7 @@
         "__id__": 603
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 606

@@ -43,6 +43,7 @@ export class SlimeScript extends cc.Component {
     curSprintTime: number;
     maxSprintTime: number;
     attackDistance: number;
+    attackCD: number;
 
     sprintCB: number;
     curCBtime: number;
@@ -65,6 +66,7 @@ export class SlimeScript extends cc.Component {
         this.curSprintTime = 0;
         this.maxSprintTime = 0.25;
         this.attackDistance = 110;
+        this.attackCD = 0;
 
         this.sprintCB = 2;
         this.curCBtime = 0;
@@ -78,10 +80,16 @@ export class SlimeScript extends cc.Component {
     }
 
     onPostSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
-        if (otherCollider.name == "Player") {
-            EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
-                AttackPlayerEventType.PHYSICAL_ATTACK, 10
-            ));
+        if (otherCollider.node.name == "Player") {
+            // attack player if cd > 0
+            if (this.attackCD == 0) {
+                EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
+                    AttackPlayerEventType.PHYSICAL_ATTACK, 10
+                ));
+                // set attack cooldown
+                this.attackCD = 1
+            }
+            // reset sprint time
             this.curSprintTime = 0;
         }
     }
@@ -91,13 +99,14 @@ export class SlimeScript extends cc.Component {
     }
 
     update (deltaTime: number) {
-        console.log(this.curSprintTime);
         let velocity: cc.Vec2 = this.rigidBody.linearVelocity;
         let playerwidth: number = this.player.getComponent(cc.UITransform).contentSize.width;
         let enemywidth: number = this.uiTransform.contentSize.width;
         let distanceBetween: number = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
         let verticalDistance: number = Math.abs(this.player.position.y - this.node.position.y);
         let horizontalDistance: number = Math.abs(this.player.position.x - this.node.position.x)
+        // update cooldowns
+        this.attackCD = Math.max(this.attackCD - deltaTime, 0);
         this.curCBtime = Math.max(this.curCBtime - deltaTime, 0);
         
         if (Math.abs(distanceBetween) < this.attackDistance && this.curSprintTime == 0 && this.curCBtime == 0 && verticalDistance < this.maxVerticalDistance) {

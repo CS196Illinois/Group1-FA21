@@ -1,5 +1,7 @@
 
 import * as cc from 'cc';
+import { AttackPlayerEvent, AttackPlayerEventType } from './events/AttackPlayerEvent';
+import { EventManager } from './events/EventManager';
 import { PlayerController } from './PlayerController';
 import { SlimeScript } from './SlimeScript';
 import { SoldierScript } from './SoldierScript';
@@ -97,6 +99,9 @@ export class EnemyWeaponScript extends cc.Component {
         if (otherCollider.node.name == "Player" && this.curAttackTime > 0) {
             this.objectForced = otherCollider.node;
             this.curForceTime = this.maxForceTime;
+            EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
+                AttackPlayerEventType.PHYSICAL_ATTACK, 10
+            ));
         }
     }
 

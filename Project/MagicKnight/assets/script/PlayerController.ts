@@ -72,7 +72,10 @@ export class PlayerController extends cc.Component {
     private weapon: cc.Node;
 
     // hp
-    private hp: number;
+    private _hp: number;
+    public get hp() { return this._hp; }
+    private set hp(value: number) { this._hp = value; }
+    public maxHp: number;
 
     onLoad () {
         // initializations
@@ -118,8 +121,11 @@ export class PlayerController extends cc.Component {
         });
 
         //hp
-        this.hp = 100;
+        this.maxHp = 100;
+        this.hp = this.maxHp;
     }
+
+    eventId = 0
 
     start () {
         // add a key down listener (when a key is pressed the function this.onKeyDown will be called)
@@ -127,15 +133,19 @@ export class PlayerController extends cc.Component {
         // add a key up listener
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         // add a collision listener (invoke callback after collision is solved)
-        e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => {})
+        this.eventId = e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event))
         if (this.collider) {
             this.collider.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
         }
     }
 
+    onDestroy () {
+        e.EventManager.instance.off("AttackPlayer", this.eventId)
+    }
+
     onAttack (event: AttackPlayerEvent) {
         if (event.type == AttackPlayerEventType.PHYSICAL_ATTACK) {
-            this.hp -= event.attack;
+            this.hp = Math.max(this.hp - event.attack, 0);
             e.EventManager.instance.emit("hp-change", new HPChangeEvent(
                 HPChangeEventType.HP_CHANGE, this.hp
             ));
