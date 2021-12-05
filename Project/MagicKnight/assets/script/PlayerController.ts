@@ -127,7 +127,7 @@ export class PlayerController extends cc.Component {
         // add a key up listener
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         // add a collision listener (invoke callback after collision is solved)
-        e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => {})
+        e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event))
         if (this.collider) {
             this.collider.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
         }

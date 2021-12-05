@@ -78,7 +78,7 @@ export class SlimeScript extends cc.Component {
     }
 
     onPostSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
-        if (otherCollider.name == "Player") {
+        if (otherCollider.node.name == "Player") {
             EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
                 AttackPlayerEventType.PHYSICAL_ATTACK, 10
             ));
