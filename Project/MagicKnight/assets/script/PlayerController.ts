@@ -6,6 +6,8 @@ import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
 import * as e from './events/EventManager';
 import { Backpack } from './BackpackController';
 import { Weapon } from './Item';
+import { AttackPlayerEvent, AttackPlayerEventType } from './events/AttackPlayerEvent';
+import { HPChangeEvent, HPChangeEventType } from './events/HPChangeEvent';
 
 /**
  * Predefined variables
@@ -69,6 +71,9 @@ export class PlayerController extends cc.Component {
     // weapon
     private weapon: cc.Node;
 
+    // hp
+    private hp: number;
+
     onLoad () {
         // initializations
         this.rigidBody = this.getComponent(cc.RigidBody2D);
@@ -111,6 +116,9 @@ export class PlayerController extends cc.Component {
             this.weapon = cc.instantiate(weapon);
             this.node.addChild(this.weapon);
         });
+
+        //hp
+        this.hp = 100;
     }
 
     start () {
@@ -119,8 +127,18 @@ export class PlayerController extends cc.Component {
         // add a key up listener
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         // add a collision listener (invoke callback after collision is solved)
+        e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => {})
         if (this.collider) {
             this.collider.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
+        }
+    }
+
+    onAttack (event: AttackPlayerEvent) {
+        if (event.type == AttackPlayerEventType.PHYSICAL_ATTACK) {
+            this.hp -= event.attack;
+            e.EventManager.instance.emit("hp-change", new HPChangeEvent(
+                HPChangeEventType.HP_CHANGE, this.hp
+            ));
         }
     }
 
