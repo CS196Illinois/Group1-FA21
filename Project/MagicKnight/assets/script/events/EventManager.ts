@@ -14,38 +14,46 @@ const { ccclass, property } = cc._decorator;
  *
  */
 
+let nextId = 0
+
+function getNextId() {
+    const id = nextId
+    nextId += 1
+    return id
+}
+
 export class EventManager {
     // singleton instance
     private static _instance = new EventManager();
     public static get instance(): EventManager { return EventManager._instance; }
 
     // event listeners are saved here
-    private listeners: { [key: string]: Array<(event: BaseEvent) => void> } = {};
+    private listeners: Map<string, Map<number, (event: BaseEvent) => void>> = new Map();
 
     private constructor() {}
 
-    // add an event listener
-    public on(tag: string, listener: (event: BaseEvent) => void) {
+    // add an event listener and return assigned id
+    public on(tag: string, listener: (event: BaseEvent) => void): number {
         if (this.listeners[tag] == null) {
-            this.listeners[tag] = [];
+            this.listeners[tag] = new Map();
         }
-        this.listeners[tag].push(listener);
+        const id = getNextId()
+        this.listeners[tag].set(id, listener);
+        return id
     }
 
-    // remove an event listener
-    public off(tag: string, listener: (event: BaseEvent) => void) {
+    // use id to remove an event listener
+    public off(tag: string, id: number) {
         if (this.listeners[tag] == null) return;
-        this.listeners[tag].forEach((element, index) => {
-            if (element == listener) this.listeners[tag].splice(index, 1);
-        });
+        this.listeners[tag].delete(id);
     }
 
     // notify all listeners under the tag and pass the event as the argument
     public emit(tag: string, event: BaseEvent) {
         if (this.listeners[tag] == null) return;
-        this.listeners[tag].forEach(listener => {
+        for (let listener of this.listeners[tag].values()) {
             listener(event);
-        });
+        }
     }
 }
 

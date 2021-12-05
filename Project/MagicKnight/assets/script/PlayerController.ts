@@ -125,16 +125,22 @@ export class PlayerController extends cc.Component {
         this.hp = this.maxHp;
     }
 
+    eventId = 0
+
     start () {
         // add a key down listener (when a key is pressed the function this.onKeyDown will be called)
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         // add a key up listener
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         // add a collision listener (invoke callback after collision is solved)
-        e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event))
+        this.eventId = e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event))
         if (this.collider) {
             this.collider.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
         }
+    }
+
+    onDestroy () {
+        e.EventManager.instance.off("AttackPlayer", this.eventId)
     }
 
     onAttack (event: AttackPlayerEvent) {
