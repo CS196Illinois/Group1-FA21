@@ -30,16 +30,9 @@ export class GameManager extends cc.Component {
     // @property
     // serializableDummy = 0;
 
-    // prefabs
-    private weapon: cc.Prefab;
-
     onLoad() {
         cc.game.addPersistRootNode(this.node);
         e.EventManager.instance.on("LoadScene", (event: LoadSceneEvent) => { this.loadScene(event) });
-        cc.resources.load("prefabs/Weapon", cc.Prefab, (err, weapon) => {
-            this.weapon = weapon;
-            this.weapon.name = "weapon";
-        });
     }
 
     loadScene(event: LoadSceneEvent) {
@@ -91,7 +84,6 @@ export class GameManager extends cc.Component {
         });
 
         // specific configurations for player
-        player.addChild(cc.instantiate(this.weapon));
         player.addComponent(PlayerController);
 
         // specific configurations for terrain

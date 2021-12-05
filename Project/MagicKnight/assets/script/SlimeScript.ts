@@ -1,5 +1,7 @@
 
 import * as cc from 'cc';
+import { AttackPlayerEvent, AttackPlayerEventType } from './events/AttackPlayerEvent';
+import { EventManager } from './events/EventManager';
 const { ccclass, property } = cc._decorator;
 
 
@@ -77,6 +79,9 @@ export class SlimeScript extends cc.Component {
 
     onPostSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         if (otherCollider.name == "Player") {
+            EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
+                AttackPlayerEventType.PHYSICAL_ATTACK, 10
+            ));
             this.curSprintTime = 0;
         }
     }
