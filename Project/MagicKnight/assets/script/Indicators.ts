@@ -33,11 +33,11 @@ class IndicatorController {
     constructor(indicator: Node) {
         this.indicator = indicator
         this.uiComponent = this.indicator.getComponent(UITransformComponent)
-        this.originalSize = this.uiComponent.contentSize
+        this.originalSize = this.uiComponent.contentSize.clone()
     }
 
-    updateHp(hp: number) {
-        const newX = this.originalSize.x * hp / 100
+    updateValue(value: number) {
+        const newX = this.originalSize.x * value / 100
         const oldY = this.originalSize.y
         this.uiComponent.setContentSize(new math.Size(newX, oldY))
     }
@@ -59,7 +59,7 @@ export class Indicators extends Component {
         this.hpIndicator = new IndicatorController(this.node.getChildByName("HPIndicator"))
         this.mpIndicator = new IndicatorController(this.node.getChildByName("MPIndicator"))
 
-        EventManager.instance.on("hp-change", (event: HPChangeEvent) => this.hpIndicator.updateHp(event.hp))
+        EventManager.instance.on("hp-change", (event: HPChangeEvent) => this.hpIndicator.updateValue(event.hp))
     }
 
     // update (deltaTime: number) {

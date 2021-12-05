@@ -1,5 +1,6 @@
 
 import * as cc from 'cc';
+import { Vec3 } from 'cc';
 //import { _decorator, Component, Node, CCObject } from 'cc';
 const { ccclass, property } = cc._decorator;
 
@@ -38,42 +39,61 @@ export class CameraMovement extends cc.Component {
         let canvas = cc.find("Canvas");
         this.map = canvas.getChildByName("Map");
         this.size = canvas.getComponent(cc.UITransform).contentSize;
+        // Instantly teleport to player's position (doesn't work)
+        // let playerPosition = this.mapToCameraCoords(this.clamp(this.getTargetPosition()));
+        // console.log(playerPosition);
+        // this.node.setPosition(playerPosition);
     }
 
-    private static lerp (to: cc.Vec3, from: cc.Vec3, ratio: number) {
+
+    // Transformation between the map and camera coordinate systems
+    public mapToCameraCoords(position: Vec3): Vec3 {
+        return new Vec3(position.x - this.size.width / 2, position.y - this.size.height / 2, position.z);
+    }
+
+    public cameraToMapCoords(position: Vec3): Vec3 {
+        return new Vec3(position.x + this.size.width / 2, position.y + this.size.height / 2, position.z);
+    }
+
+    // Custom lerp function
+    private static lerp(to: cc.Vec3, from: cc.Vec3, ratio: number) {
         let target = from.clone();
         target.x += ratio * (to.x - from.x);
         target.y += ratio * (to.y - from.y);
         return target;
     }
 
-    update (deltaTime: number) {
-        // make clones because we do not want to make change to the original value
-        let targetPosition = this.player.getPosition().clone();
-        let currentPosition = this.node.getPosition().clone();
+    // Make sure the position is within the bounds of the map
+    // Uses map coordinates
+    private clamp(position: Vec3): Vec3 {
+        let mapSize = this.map.getComponent(cc.UITransform).contentSize
+        let result = new Vec3(0, 0, position.z);
+        result.x = cc.misc.clampf(position.x, this.size.width / 2, mapSize.width - this.size.width / 2);
+        result.y = cc.misc.clampf(position.y, this.size.height / 2, mapSize.height - this.size.height / 2);
+        return result;
+    }
 
+    // Get the position of the player in map coordinates
+    private getTargetPosition() {
+        let targetPosition = this.player.getPosition().clone();
         // find the center of the player
         targetPosition.x += this.playerUITransform.contentSize.width / 2;
         targetPosition.y += this.playerUITransform.contentSize.height / 2;
+        return targetPosition;
+    }
 
-        // find the actual position of the camera in the coordinates
-        currentPosition.x += this.size.width / 2;
-        currentPosition.y += this.size.height / 2;
+    update(deltaTime: number) {
+        // make clones because we do not want to make change to the original value
+        // Both are in map coordinates
+        let targetPosition = this.getTargetPosition();
+        let currentPosition = this.cameraToMapCoords(this.node.getPosition().clone());
 
         // make the camera move towards player's position at a ratio determined by dt
-        let nextPosition = CameraMovement.lerp(targetPosition, currentPosition, deltaTime * this.speed);
-
         // clamp AFTER the lerp to get better effect
-        let mapSize = this.map.getComponent(cc.UITransform).contentSize  // just in case the map size changes
-        nextPosition.x = cc.misc.clampf(nextPosition.x, this.size.width / 2, mapSize.width - this.size.width / 2);
-        nextPosition.y = cc.misc.clampf(nextPosition.y, this.size.height / 2, mapSize.height - this.size.height / 2);
-
-        // transform back to the camera's coordinates
-        nextPosition.x -= this.size.width / 2;
-        nextPosition.y -= this.size.height / 2;
+        let nextPosition = this.clamp(CameraMovement.lerp(targetPosition, currentPosition, deltaTime * this.speed));
 
         // update the position
-        this.node.setPosition(nextPosition);
+        this.node.setPosition(this.mapToCameraCoords(nextPosition));
     }
 }
 

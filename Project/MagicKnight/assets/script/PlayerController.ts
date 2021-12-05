@@ -72,7 +72,10 @@ export class PlayerController extends cc.Component {
     private weapon: cc.Node;
 
     // hp
-    private hp: number;
+    private _hp: number;
+    public get hp() { return this._hp; }
+    private set hp(value: number) { this._hp = value; }
+    public maxHp: number;
 
     onLoad () {
         // initializations
@@ -118,7 +121,8 @@ export class PlayerController extends cc.Component {
         });
 
         //hp
-        this.hp = 100;
+        this.maxHp = 100;
+        this.hp = this.maxHp;
     }
 
     start () {
@@ -135,7 +139,7 @@ export class PlayerController extends cc.Component {
 
     onAttack (event: AttackPlayerEvent) {
         if (event.type == AttackPlayerEventType.PHYSICAL_ATTACK) {
-            this.hp -= event.attack;
+            this.hp = Math.max(this.hp - event.attack, 0);
             e.EventManager.instance.emit("hp-change", new HPChangeEvent(
                 HPChangeEventType.HP_CHANGE, this.hp
             ));
