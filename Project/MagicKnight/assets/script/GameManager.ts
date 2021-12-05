@@ -23,12 +23,10 @@ import { SoldierScript } from './SoldierScript';
  
 @ccclass('GameManager')
 export class GameManager extends cc.Component {
-    // [1]
-    // dummy = '';
-
-    // [2]
-    // @property
-    // serializableDummy = 0;
+    @property({ type: cc.SpriteFrame })
+    public terrainSpriteFrame: cc.SpriteFrame;
+    @property({ type: cc.SpriteFrame })
+    public mapSpriteFrame: cc.SpriteFrame;
 
     onLoad() {
         cc.game.addPersistRootNode(this.node);
@@ -85,12 +83,20 @@ export class GameManager extends cc.Component {
 
         // specific configurations for player
         player.addComponent(PlayerController);
+        // cc.resources.load(imageList["player"] + "/spriteFrame", cc.SpriteFrame, (err, spriteFrame) => {
+        //     player.getComponent(cc.Sprite).spriteFrame = spriteFrame;
+        // });
 
         // specific configurations for terrain
         terrain.children.forEach(node => {
+            // customize rigidBody
             let rigidBody = node.getComponent(cc.RigidBody2D);
             rigidBody.type = cc.ERigidBody2DType.Static;
             rigidBody.gravityScale = 0;
+            // image
+            let sprite = node.getComponent(cc.Sprite);
+            sprite.spriteFrame = this.terrainSpriteFrame;
+            sprite.type = cc.Sprite.Type.TILED;
         });
 
         // specific configurations for characters
@@ -100,10 +106,15 @@ export class GameManager extends cc.Component {
 
         soldier.children.forEach(node => {
             node.addComponent(SoldierScript);
-        })
+        });
 
         // specific configurations for npc
         npc.children.forEach(node => {});
+
+        // map configurations
+        // let sprite = map.getComponent(cc.Sprite);
+        // sprite.spriteFrame = this.mapSpriteFrame;
+        // sprite.type = cc.Sprite.Type.TILED;
     }
 }
 
