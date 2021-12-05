@@ -190,8 +190,8 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 27177.024,
-      "y": 2663.468,
+      "x": 0,
+      "y": 0,
       "z": 1000
     },
     "_lrot": {
@@ -229,7 +229,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 370.65963060686016,
+    "_orthoHeight": 517.8042959427207,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -21885,7 +21885,7 @@
         "__id__": 603
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 606

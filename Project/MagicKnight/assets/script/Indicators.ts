@@ -42,7 +42,7 @@ class IndicatorController {
         this.uiComponent.setContentSize(new math.Size(newX, oldY))
     }
 }
- 
+
 @ccclass('Indicators')
 export class Indicators extends Component {
     // [1]
@@ -55,11 +55,19 @@ export class Indicators extends Component {
     private hpIndicator: IndicatorController
     private mpIndicator: IndicatorController
 
+    private count = 0
+    
+    private onHpChangeEventId = 0
+
     start () {
         this.hpIndicator = new IndicatorController(this.node.getChildByName("HPIndicator"))
         this.mpIndicator = new IndicatorController(this.node.getChildByName("MPIndicator"))
 
-        EventManager.instance.on("hp-change", (event: HPChangeEvent) => this.hpIndicator.updateValue(event.hp))
+        this.onHpChangeEventId = EventManager.instance.on("hp-change", (event: HPChangeEvent) => this.hpIndicator.updateValue(event.hp))
+    }
+
+    onDestroy () {
+        EventManager.instance.off("hp-change", this.onHpChangeEventId)
     }
 
     // update (deltaTime: number) {

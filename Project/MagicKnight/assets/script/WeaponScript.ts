@@ -35,7 +35,6 @@ export class WeaponScript extends cc.Component {
     isCollide: boolean;
 
     //attack
-    private allowAttack: boolean;
     private rotateStep: number;
     private initialRotation: number;
     private curAttackTime: number;
@@ -62,7 +61,6 @@ export class WeaponScript extends cc.Component {
         this.curRotateTime = 0;
         this.isCollide = false;
 
-        this.allowAttack = true;
         this.rotateStep = -30;
         this.initialRotation = -25;
         this.curAttackTime = 0;
@@ -91,9 +89,6 @@ export class WeaponScript extends cc.Component {
     onKeyDown (event: cc.EventKeyboard) {
         switch (event.keyCode) {
             case this.keyAttack:
-                if(!this.allowAttack) {
-                    break;
-                }
                 if (this.curAttackTime == 0)  {
                     this.curAttackTime = this.maxAttackTime;
                 }
@@ -103,9 +98,10 @@ export class WeaponScript extends cc.Component {
 
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         if (otherCollider.node.getParent().getParent().name == "Enemy" && this.curAttackTime > 0) {
+            console.log(otherCollider.node.name);
             this.objectForced = otherCollider.node;
             this.curForceTime = this.maxForceTime;
-            if (otherCollider.node.getParent().name = "Slime") {
+            if (otherCollider.node.getParent().name == "Slime") {
                 otherCollider.node.getComponent(SlimeScript).reSetcurCBtime();
             }
         }
