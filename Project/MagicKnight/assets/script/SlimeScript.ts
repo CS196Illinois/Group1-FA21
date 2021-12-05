@@ -31,6 +31,7 @@ export class SlimeScript extends cc.Component {
     horizontalStep: number;
     maxDistance: number;
     maxVerticalDistance: number;
+    maxHorizontalDistance: number;
 
     rigidBody: cc.RigidBody2D;
     collider: cc.Collider2D;
@@ -43,7 +44,6 @@ export class SlimeScript extends cc.Component {
     maxSprintTime: number;
     attackDistance: number;
 
-    allowSprint: boolean;
     sprintCB: number;
     curCBtime: number;
 
@@ -54,6 +54,7 @@ export class SlimeScript extends cc.Component {
         this.horizontalStep = 3;
         this.maxDistance = 50;
         this.maxVerticalDistance = 180;
+        this.maxHorizontalDistance = 700;
 
         this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
@@ -65,7 +66,6 @@ export class SlimeScript extends cc.Component {
         this.maxSprintTime = 0.25;
         this.attackDistance = 110;
 
-        this.allowSprint = true;
         this.sprintCB = 2;
         this.curCBtime = 0;
 
@@ -97,6 +97,7 @@ export class SlimeScript extends cc.Component {
         let enemywidth: number = this.uiTransform.contentSize.width;
         let distanceBetween: number = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
         let verticalDistance: number = Math.abs(this.player.position.y - this.node.position.y);
+        let horizontalDistance: number = Math.abs(this.player.position.x - this.node.position.x)
         this.curCBtime = Math.max(this.curCBtime - deltaTime, 0);
         
         if (Math.abs(distanceBetween) < this.attackDistance && this.curSprintTime == 0 && this.curCBtime == 0 && verticalDistance < this.maxVerticalDistance) {
@@ -116,7 +117,7 @@ export class SlimeScript extends cc.Component {
                 velocity.x = - this.sprintStep;
             }
             this.curSprintTime = Math.max(this.curSprintTime - deltaTime, 0);
-        } else if (verticalDistance > this.maxVerticalDistance) {
+        } else if (verticalDistance > this.maxVerticalDistance || horizontalDistance > this.maxHorizontalDistance) {
             velocity.x = 0;
         } else {
             if (distanceBetween > this.maxDistance) {

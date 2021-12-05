@@ -2,6 +2,7 @@
 import * as cc from 'cc';
 import { PlayerController } from './PlayerController';
 import { SlimeScript } from './SlimeScript';
+import { SoldierScript } from './SoldierScript';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -16,8 +17,8 @@ const { ccclass, property } = cc._decorator;
  *
  */
  
-@ccclass('NewComponent')
-export class NewComponent extends cc.Component {
+@ccclass('EnemyWeaponScript')
+export class EnemyWeaponScript extends cc.Component {
     // [1]
     // dummy = '';
 
@@ -27,19 +28,20 @@ export class NewComponent extends cc.Component {
     rigidBody: cc.RigidBody2D;
     collider: cc.Collider2D;
     uiTransform: cc.UITransform;
-    player: cc.Node;
-    playerController: PlayerController;
+    soldier: cc.Node;
+    SoldierScript: SoldierScript;
     maxRotateTime: number;
     curRotateTime: number;
 
     isCollide: boolean;
 
     //attack
-    private allowAttack: boolean;
     private rotateStep: number;
     private initialRotation: number;
     private curAttackTime: number;
     private maxAttackTime: number;
+
+    attackRadius: number;
 
     // Apply force to enemy
     maxForceTime: number;
@@ -50,23 +52,26 @@ export class NewComponent extends cc.Component {
     private weaponRightX: number;
     private weaponY: number;
 
-    private keyAttack: cc.KeyCode;
+    attackCd: number;
+    curCdtime: number;
+
 
     onLoad () {
         this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
         this.uiTransform = this.getComponent(cc.UITransform);
-        this.player = this.node.getParent();
+        this.soldier = this.node.getParent();
 
         this.maxRotateTime = 0.2;
         this.curRotateTime = 0;
         this.isCollide = false;
 
-        this.allowAttack = true;
         this.rotateStep = -30;
         this.initialRotation = -25;
         this.curAttackTime = 0;
         this.maxAttackTime = 0.15;
+
+        this.attackRadius = 70;
 
         this.curForceTime = 0;
         this.maxForceTime = 0.3;
@@ -75,43 +80,33 @@ export class NewComponent extends cc.Component {
         this.weaponRightX = 40;
         this.weaponY = 30;
 
-        this.keyAttack = cc.KeyCode.KEY_J;
+        this.attackCd = 0.5;
+        this.curCdtime = 0;
     }
 
     start () {
-        this.playerController = this.player.getComponent(PlayerController);
+        this.SoldierScript = this.soldier.getComponent(SoldierScript);
         if (this.collider) {
             this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.preSolve, this);
             this.collider.on(cc.Contact2DType.END_CONTACT, this.preSolve, this);
         }
-        // add a key down listener (when a key is pressed the function this.onKeyDown will be called)
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
     }
 
-    onKeyDown (event: cc.EventKeyboard) {
-        switch (event.keyCode) {
-            case this.keyAttack:
-                if(!this.allowAttack) {
-                    break;
-                }
-                if (this.curAttackTime == 0)  {
-                    this.curAttackTime = this.maxAttackTime;
-                }
-                break;
-        }
-    }
 
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
-        if (otherCollider.node.getParent().getParent().name == "Enemy" && this.curAttackTime > 0) {
+        if (otherCollider.node.name == "Player" && this.curAttackTime > 0) {
             this.objectForced = otherCollider.node;
             this.curForceTime = this.maxForceTime;
-            if (otherCollider.node.getParent().name = "Slime") {
-                otherCollider.node.getComponent(SlimeScript).reSetcurCBtime();
-            }
         }
     }
 
     update (deltaTime: number) {
+        this.curCdtime = Math.max(this.curCdtime - deltaTime, 0);
+        if (this.curAttackTime == 0 && Math.abs(this.SoldierScript.distanceBetween) < this.attackRadius && this.curCdtime == 0 && !this.SoldierScript.isOutOfBound) {
+            this.curAttackTime = this.maxAttackTime;
+            this.curCdtime = this.attackCd;
+        }
+
         // enable collider when attacking
         if (this.curAttackTime > 0) {
             this.collider.enabled = true;
@@ -121,21 +116,21 @@ export class NewComponent extends cc.Component {
         this.collider.apply();
 
         // follow player
-        if (this.playerController.facingright) {
+        if (this.SoldierScript.facingright) {
             this.node.setPosition(this.weaponRightX, this.weaponY);
         } else {
-            this.node.setPosition(this.playerController.uiTransform.contentSize.width - this.weaponRightX, this.weaponY);
+            this.node.setPosition(this.SoldierScript.uiTransform.contentSize.width - this.weaponRightX, this.weaponY);
         }
 
         // attack
         if (this.curAttackTime > 0) {
-            if (this.playerController.facingright) this.rigidBody.angularVelocity = this.rotateStep;
-            if (!this.playerController.facingright) this.rigidBody.angularVelocity = -this.rotateStep;
+            if (this.SoldierScript.facingright) this.rigidBody.angularVelocity = this.rotateStep;
+            if (!this.SoldierScript.facingright) this.rigidBody.angularVelocity = -this.rotateStep;
             this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
         } else {
             this.rigidBody.angularVelocity = 0;
-            if (this.playerController.facingright) this.node.setRotationFromEuler(0, 0, this.initialRotation);
-            if (!this.playerController.facingright) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
+            if (this.SoldierScript.facingright) this.node.setRotationFromEuler(0, 0, this.initialRotation);
+            if (!this.SoldierScript.facingright) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
         }
 
         // apply force
