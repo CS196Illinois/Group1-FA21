@@ -99,6 +99,10 @@
       "__uuid__": "56af7ba5-10d3-4299-af88-22d846f0d953@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
+    "playerSpriteFrame": {
+      "__uuid__": "75315a6f-52b7-49d6-ad7f-44d4c463fba8@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
     "_id": "40UMN2g19LGYQkHAM0csBX"
   },
   {
@@ -300,7 +304,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 376.9633507853403,
+    "_orthoHeight": 370.65963060686016,
     "_near": 1,
     "_far": 2000,
     "_color": {

@@ -27,6 +27,8 @@ export class GameManager extends cc.Component {
     public terrainSpriteFrame: cc.SpriteFrame;
     @property({ type: cc.SpriteFrame })
     public mapSpriteFrame: cc.SpriteFrame;
+    @property({ type: cc.SpriteFrame })
+    public playerSpriteFrame: cc.SpriteFrame;
 
     onLoad() {
         cc.game.addPersistRootNode(this.node);
@@ -83,9 +85,9 @@ export class GameManager extends cc.Component {
 
         // specific configurations for player
         player.addComponent(PlayerController);
-        // let playerSprite = player.getComponent(cc.Sprite);
-        // playerSprite.type = cc.Sprite.Type.TILED;
-        // playerSprite.spriteFrame = this.playerSpriteFrame;
+        let playerSprite = player.getComponent(cc.Sprite);
+        playerSprite.type = cc.Sprite.Type.TILED;
+        playerSprite.spriteFrame = this.playerSpriteFrame;
 
         // specific configurations for terrain
         terrain.children.forEach(node => {
@@ -115,6 +117,7 @@ export class GameManager extends cc.Component {
         // let mapSprite = map.getComponent(cc.Sprite);
         // mapSprite.type = cc.Sprite.Type.TILED;
         // mapSprite.spriteFrame = this.mapSpriteFrame;
+        // console.log(map);
     }
 }
 
