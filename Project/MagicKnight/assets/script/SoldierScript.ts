@@ -44,6 +44,11 @@ export class SoldierScript extends cc.Component {
 
     isOutOfBound: boolean;
 
+    // push away by weapon
+    force: number;
+    forceResist: number;
+    forceDecay: number;
+
     onLoad() {
         this.player = cc.find("Canvas/Map/Player");
 
@@ -71,6 +76,9 @@ export class SoldierScript extends cc.Component {
 
         this.isOutOfBound = true;
 
+        this.force = 0;
+        this.forceResist = 1.5;
+        this.forceDecay = 80;
     }
 
     start () {
@@ -102,8 +110,16 @@ export class SoldierScript extends cc.Component {
             velocity.x = 0;
             this.isOutOfBound = false;
         }
+
+        // Add forced effect
+        velocity.x += this.force;
+        if (this.force > 0) {
+            this.force = Math.max(this.force - deltaTime * this.forceDecay, 0);
+        } else if (this.force < 0) {
+            this.force = Math.min(this.force + deltaTime * this.forceDecay, 0);
+        }
+
         this.rigidBody.linearVelocity = velocity;
-        
     }
 }
 /**

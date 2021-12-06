@@ -46,10 +46,13 @@ export class EnemyWeaponScript extends cc.Component {
 
     attackRadius: number;
 
-    // Apply force to enemy
-    maxForceTime: number;
-    curForceTime: number;
-    objectForced: cc.Node;
+    // Apply force to enemy (no longer used)
+    // maxForceTime: number;
+    // curForceTime: number;
+    // objectForced: cc.Node;
+
+    // Force of weapon
+    public push: number;
 
     // weapom position
     private weaponRightX: number;
@@ -77,9 +80,11 @@ export class EnemyWeaponScript extends cc.Component {
 
         this.attackRadius = 70;
 
-        this.curForceTime = 0;
-        this.maxForceTime = 0.3;
-        this.objectForced = null;
+        // this.curForceTime = 0;
+        // this.maxForceTime = 0.3;
+        // this.objectForced = null;
+
+        this.push = 15;
 
         this.weaponRightX = 40;
         this.weaponY = 30;
@@ -92,7 +97,7 @@ export class EnemyWeaponScript extends cc.Component {
         this.SoldierScript = this.soldier.getComponent(SoldierScript);
         if (this.collider) {
             this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.preSolve, this);
-            this.collider.on(cc.Contact2DType.END_CONTACT, this.preSolve, this);
+            // this.collider.on(cc.Contact2DType.END_CONTACT, this.preSolve, this); (why add this?)
         }
     }
 
@@ -100,8 +105,10 @@ export class EnemyWeaponScript extends cc.Component {
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         if (otherCollider.node.name == "Player" && this.curAttackTime > 0 && this.canDamage) {
             this.canDamage = false;
-            this.objectForced = otherCollider.node;
-            this.curForceTime = this.maxForceTime;
+            // this.objectForced = otherCollider.node; (no longer used)
+            // this.curForceTime = this.maxForceTime;
+            let direction = otherCollider.node.position.x > this.node.parent.position.x ? 1 : -1;
+            otherCollider.getComponent(PlayerController).force = this.push * direction;
             EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
                 AttackPlayerEventType.PHYSICAL_ATTACK, 20
             ));
@@ -138,14 +145,14 @@ export class EnemyWeaponScript extends cc.Component {
             if (!this.SoldierScript.facingright) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
         }
 
-        // apply force
-        if (this.curForceTime > 0) {
-            let direction = this.objectForced.position.x > this.node.parent.position.x ? 1 : -1;
-            this.objectForced.getComponent(cc.RigidBody2D).applyForceToCenter(new cc.Vec2(2000 * direction, 0), true);
-            this.curForceTime -= deltaTime;
-        } else {
-            this.curForceTime = 0;
-        }
+        // apply force (no longer used)
+        // if (this.curForceTime > 0) {
+        //     let direction = this.objectForced.position.x > this.node.parent.position.x ? 1 : -1;
+        //     this.objectForced.getComponent(cc.RigidBody2D).applyForceToCenter(new cc.Vec2(2000 * direction, 0), true);
+        //     this.curForceTime -= deltaTime;
+        // } else {
+        //     this.curForceTime = 0;
+        // }
 
         // decide if attack
         this.curCdtime = Math.max(this.curCdtime - deltaTime, 0);

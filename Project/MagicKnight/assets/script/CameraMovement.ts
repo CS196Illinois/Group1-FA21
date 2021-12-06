@@ -39,12 +39,14 @@ export class CameraMovement extends cc.Component {
         let canvas = cc.find("Canvas");
         this.map = canvas.getChildByName("Map");
         this.size = canvas.getComponent(cc.UITransform).contentSize;
-        // Instantly teleport to player's position (doesn't work)
-        // let playerPosition = this.mapToCameraCoords(this.clamp(this.getTargetPosition()));
-        // console.log(playerPosition);
-        // this.node.setPosition(playerPosition);
     }
 
+    start() {
+        // Instantly teleport to player's position (doesn't work)
+        let playerPosition = this.mapToCameraCoords(this.clamp(this.getTargetPosition()));
+        playerPosition.z = this.node.getPosition().z;
+        this.node.setPosition(playerPosition);
+    }
 
     // Transformation between the map and camera coordinate systems
     public mapToCameraCoords(position: Vec3): Vec3 {
@@ -56,7 +58,7 @@ export class CameraMovement extends cc.Component {
     }
 
     // Custom lerp function
-    private static lerp(to: cc.Vec3, from: cc.Vec3, ratio: number) {
+    private static lerp(from: cc.Vec3, to: cc.Vec3, ratio: number) {
         let target = from.clone();
         target.x += ratio * (to.x - from.x);
         target.y += ratio * (to.y - from.y);
@@ -90,7 +92,7 @@ export class CameraMovement extends cc.Component {
 
         // make the camera move towards player's position at a ratio determined by dt
         // clamp AFTER the lerp to get better effect
-        let nextPosition = this.clamp(CameraMovement.lerp(targetPosition, currentPosition, deltaTime * this.speed));
+        let nextPosition = this.clamp(CameraMovement.lerp(currentPosition, targetPosition, deltaTime * this.speed));
 
         // update the position
         this.node.setPosition(this.mapToCameraCoords(nextPosition));

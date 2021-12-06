@@ -33,6 +33,8 @@ export class GameManager extends cc.Component {
     onLoad() {
         cc.game.addPersistRootNode(this.node);
         e.EventManager.instance.on("LoadScene", (event: LoadSceneEvent) => { this.loadScene(event) });
+        // cocos bug
+        cc.macro.ENABLE_TILEDMAP_CULLING = false;
     }
 
     loadScene(event: LoadSceneEvent) {
@@ -86,7 +88,6 @@ export class GameManager extends cc.Component {
         // specific configurations for player
         player.addComponent(PlayerController);
         let playerSprite = player.getComponent(cc.Sprite);
-        playerSprite.type = cc.Sprite.Type.TILED;
         playerSprite.spriteFrame = this.playerSpriteFrame;
 
         // specific configurations for terrain

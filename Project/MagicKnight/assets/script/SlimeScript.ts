@@ -2,6 +2,7 @@
 import * as cc from 'cc';
 import { AttackPlayerEvent, AttackPlayerEventType } from './events/AttackPlayerEvent';
 import { EventManager } from './events/EventManager';
+import { PlayerController } from './PlayerController';
 const { ccclass, property } = cc._decorator;
 
 
@@ -29,6 +30,7 @@ export class SlimeScript extends cc.Component {
     player = null;
 
     horizontalStep: number;
+    horizontalStepSlow: number;
     maxDistance: number;
     maxVerticalDistance: number;
     maxHorizontalDistance: number;
@@ -43,19 +45,29 @@ export class SlimeScript extends cc.Component {
     curSprintTime: number;
     maxSprintTime: number;
     attackDistance: number;
-    attackCD: number;
+    damageCD: number;
+    curDamageCD: number;
 
-    sprintCB: number;
-    curCBtime: number;
+    sprintCD: number;
+    curSprintCD: number;
+
+    // push back ability
+    push: number;
+
+    // push away by weapon
+    force: number;
+    forceResist: number;
+    forceDecay: number;
 
 
     onLoad() {
         this.player = cc.find("Canvas/Map/Player");
 
-        this.horizontalStep = 3;
-        this.maxDistance = 50;
+        this.horizontalStep = 4;
+        this.horizontalStepSlow = 3.6;
+        this.maxDistance = 230;
         this.maxVerticalDistance = 180;
-        this.maxHorizontalDistance = 700;
+        this.maxHorizontalDistance = 900;
 
         this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
@@ -64,13 +76,19 @@ export class SlimeScript extends cc.Component {
         this.sprintToRight = true;
         this.sprintStep = 25;
         this.curSprintTime = 0;
-        this.maxSprintTime = 0.5;
-        this.attackDistance = 200;
-        this.attackCD = 0;
+        this.maxSprintTime = 0.7;
+        this.attackDistance = 300;
+        this.damageCD = 1;
+        this.curDamageCD = 0;
 
-        this.sprintCB = 2;
-        this.curCBtime = 0;
+        this.sprintCD = 2;
+        this.curSprintCD = 0;
 
+        this.push = 30;
+
+        this.force = 0;
+        this.forceResist = 0.8;
+        this.forceDecay = 120;
     }
 
     start () {
@@ -81,21 +99,27 @@ export class SlimeScript extends cc.Component {
 
     onPostSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         if (otherCollider.node.name == "Player") {
-            // attack player if cd > 0
-            if (this.attackCD == 0) {
+            // attack player if damageCD > 0
+            if (this.curDamageCD == 0) {
                 EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
                     AttackPlayerEventType.PHYSICAL_ATTACK, 10
                 ));
                 // set attack cooldown
-                this.attackCD = 1
+                this.curDamageCD = this.damageCD
+            }
+            // push player if is currently sprinting
+            if (this.curSprintTime > 0) {
+                let direction = otherCollider.node.position.x > this.node.position.x ? 1 : -1;
+                console.log(direction);
+                otherCollider.getComponent(PlayerController).force = this.push * direction;
             }
             // reset sprint time
             this.curSprintTime = 0;
         }
     }
 
-    reSetcurCBtime () {
-        this.curCBtime = Math.min(this.curCBtime + 0.5, this.sprintCB);
+    resetCurSprintCD () {
+        this.curSprintCD = Math.min(this.curSprintCD + 0.5, this.sprintCD);
     }
 
     update (deltaTime: number) {
@@ -104,43 +128,61 @@ export class SlimeScript extends cc.Component {
         let enemywidth: number = this.uiTransform.contentSize.width;
         let distanceBetween: number = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
         let verticalDistance: number = Math.abs(this.player.position.y - this.node.position.y);
-        let horizontalDistance: number = Math.abs(this.player.position.x - this.node.position.x)
+        let horizontalDistance: number = Math.abs(this.player.position.x - this.node.position.x);
+
         // update cooldowns
-        this.attackCD = Math.max(this.attackCD - deltaTime, 0);
-        this.curCBtime = Math.max(this.curCBtime - deltaTime, 0);
-        
-        if (Math.abs(distanceBetween) < this.attackDistance && this.curSprintTime == 0 && this.curCBtime == 0 && verticalDistance < this.maxVerticalDistance) {
+        this.curSprintCD = Math.max(this.curSprintCD - deltaTime, 0);
+        this.curDamageCD = Math.max(this.curDamageCD - deltaTime, 0);
+
+        // check if sprint
+        if (Math.abs(distanceBetween) < this.attackDistance && this.curSprintTime == 0 && this.curSprintCD == 0 && verticalDistance < this.maxVerticalDistance) {
             if (distanceBetween > 0) {
                 this.sprintToRight = true;
             } else {
                 this.sprintToRight = false;
             }
             this.curSprintTime = this.maxSprintTime;
-            this.curCBtime = this.sprintCB;
+            this.curSprintCD = this.sprintCD;
+            // Jump
+            velocity.y += 15;
         }
 
         if (this.curSprintTime > 0) {
-            // sprint
+            // Sprinting
             if (this.sprintToRight) {
                 velocity.x = this.sprintStep
             } else {
                 velocity.x = - this.sprintStep;
             }
-            // jump
-            this.getComponent(cc.RigidBody2D).applyLinearImpulseToCenter
-            // maximize remaining sprint time
+            // Calculate remaining sprint time
             this.curSprintTime = Math.max(this.curSprintTime - deltaTime, 0);
         } else if (verticalDistance > this.maxVerticalDistance || horizontalDistance > this.maxHorizontalDistance) {
+            // Don't move if does not detect player
             velocity.x = 0;
         } else {
+            // Normal movement
             if (distanceBetween > this.maxDistance) {
                 velocity.x = this.horizontalStep;
             } else if (distanceBetween < -this.maxDistance) {
                 velocity.x = -this.horizontalStep;
+            } else if (distanceBetween > 0 && distanceBetween + this.horizontalStepSlow <= this.maxDistance) {
+                velocity.x = -this.horizontalStepSlow;
+            } else if (distanceBetween < 0 && distanceBetween - this.horizontalStepSlow >= -this.maxDistance) {
+                velocity.x = this.horizontalStepSlow;
             } else {
                 velocity.x = 0;
             }
         }
+
+        // Add forced effect
+        velocity.x += this.force;
+        if (this.force > 0) {
+            this.force = Math.max(this.force - deltaTime * this.forceDecay, 0);
+        } else if (this.force < 0) {
+            this.force = Math.min(this.force + deltaTime * this.forceDecay, 0);
+        }
+
+        // Apply the calculated velocity
         this.rigidBody.linearVelocity = velocity;
     }
 }

@@ -2,6 +2,7 @@
 import * as cc from 'cc';
 import { PlayerController } from './PlayerController';
 import { SlimeScript } from './SlimeScript';
+import { SoldierScript } from './SoldierScript';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -40,10 +41,13 @@ export class WeaponScript extends cc.Component {
     private curAttackTime: number;
     private maxAttackTime: number;
 
-    // Apply force to enemy
-    maxForceTime: number;
-    curForceTime: number;
-    objectForced: cc.Node;
+    // Apply force to enemy (no longer used)
+    // maxForceTime: number;
+    // curForceTime: number;
+    // objectForced: cc.Node;
+
+    // Force of weapon
+    public push: number;
 
     // weapom position
     private weaponRightX: number;
@@ -66,9 +70,11 @@ export class WeaponScript extends cc.Component {
         this.curAttackTime = 0;
         this.maxAttackTime = 0.15;
 
-        this.curForceTime = 0;
-        this.maxForceTime = 0.3;
-        this.objectForced = null;
+        // this.curForceTime = 0;
+        // this.maxForceTime = 0.3;
+        // this.objectForced = null;
+
+        this.push = 20;
 
         this.weaponRightX = 40;
         this.weaponY = 30;
@@ -80,7 +86,7 @@ export class WeaponScript extends cc.Component {
         this.playerController = this.player.getComponent(PlayerController);
         if (this.collider) {
             this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.preSolve, this);
-            this.collider.on(cc.Contact2DType.END_CONTACT, this.preSolve, this);
+            // this.collider.on(cc.Contact2DType.END_CONTACT, this.preSolve, this); (why add this?)
         }
         // add a key down listener (when a key is pressed the function this.onKeyDown will be called)
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
@@ -97,13 +103,24 @@ export class WeaponScript extends cc.Component {
     }
 
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
-        if (otherCollider.node.getParent().getParent().name == "Enemy" && this.curAttackTime > 0) {
-            console.log(otherCollider.node.name);
-            this.objectForced = otherCollider.node;
-            this.curForceTime = this.maxForceTime;
-            if (otherCollider.node.getParent().name == "Slime") {
-                otherCollider.node.getComponent(SlimeScript).reSetcurCBtime();
-            }
+        // if (otherCollider.node.getParent().getParent().name == "Enemy" && this.curAttackTime > 0) {  (no longer used)
+        //     // this.objectForced = otherCollider.node;
+        //     this.curForceTime = this.maxForceTime;
+        //     if (otherCollider.node.getParent().name == "Slime") {
+        //         otherCollider.node.getComponent(SlimeScript).resetCurSprintCD();
+        //     }
+        // }
+        if (this.curAttackTime == 0) {
+            return
+        } else if (otherCollider.node.parent.name == "Slime") {
+            let slimeScript = otherCollider.getComponent(SlimeScript);
+            let direction = otherCollider.node.position.x > this.node.parent.position.x ? 1 : -1;
+            slimeScript.force = this.push / slimeScript.forceResist * direction;
+            slimeScript.resetCurSprintCD();
+        } else if (otherCollider.node.parent.name == "Soldier") {
+            let soldierScript = otherCollider.getComponent(SoldierScript);
+            let direction = otherCollider.node.position.x > this.node.parent.position.x ? 1 : -1;
+            soldierScript.force = this.push / soldierScript.forceResist * direction;
         }
     }
 
@@ -120,7 +137,7 @@ export class WeaponScript extends cc.Component {
         if (this.playerController.facingright) {
             this.node.setPosition(this.weaponRightX, this.weaponY);
         } else {
-            this.node.setPosition(this.playerController.uiTransform.contentSize.width - this.weaponRightX, this.weaponY);
+            this.node.setPosition(this.playerController.getComponent(cc.UITransform).contentSize.width - this.weaponRightX, this.weaponY);
         }
 
         // attack
@@ -134,14 +151,14 @@ export class WeaponScript extends cc.Component {
             if (!this.playerController.facingright) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
         }
 
-        // apply force
-        if (this.curForceTime > 0) {
-            let direction = this.objectForced.position.x > this.node.parent.position.x ? 1 : -1;
-            this.objectForced.getComponent(cc.RigidBody2D).applyForceToCenter(new cc.Vec2(2000 * direction, 0), true);
-            this.curForceTime -= deltaTime;
-        } else {
-            this.curForceTime = 0;
-        }
+        // apply force (no longer used)
+        // if (this.curForceTime > 0) {
+        //     let direction = this.objectForced.position.x > this.node.parent.position.x ? 1 : -1;
+        //     this.objectForced.getComponent(cc.RigidBody2D).applyForceToCenter(new cc.Vec2(2000 * direction, 0), true);
+        //     this.curForceTime -= deltaTime;
+        // } else {
+        //     this.curForceTime = 0;
+        // }
     }
 }
 

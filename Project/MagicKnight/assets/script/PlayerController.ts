@@ -26,42 +26,45 @@ export class PlayerController extends cc.Component {
     // useful components
     private rigidBody: cc.RigidBody2D;
     private collider: cc.Collider2D;
-    private _uiTransform: cc.UITransform;
-    public get uiTransform(): cc.UITransform { return this._uiTransform; }
-    private set uiTransform(value: cc.UITransform) { this._uiTransform = value; }
+    private uiTransform: cc.UITransform;
 
     // detect movement command
-    private moveLeft: boolean;
-    private moveRight: boolean;
-    private jump: boolean;
-    private _facingright: boolean;
-    public get facingright(): boolean { return this._facingright }
-    private set facingright(value: boolean) { this._facingright = value; }
+    public moveLeft: boolean;
+    public moveRight: boolean;
+    public jump: boolean;
+    public facingright: boolean;
 
     // number of consecutive jumps (while in air)
-    private curJumpNum: number;
-    private maxJumpNum: number;
+    public curJumpNum: number;
+    public maxJumpNum: number;
 
     // drop
-    private isDropping: boolean;
+    public isDropping: boolean;
 
     // sprint
-    private allowSprint: boolean;
-    private sprintStep: number;
-    private curSprintTime: number;
-    private maxSprintTime: number;
+    public allowSprint: boolean;
+    public sprintStep: number;
+    public curSprintTime: number;
+    public sprintTime: number;
+    public curSprintCD: number;
+    public sprintCD: number;
+    public sprintDirection: number;
 
     // speed of movement
-    private horizontalStep: number;
-    private verticalStep: number;
-    private verticalMaxStep: number;
+    public horizontalStep: number;
+    public verticalStep: number;
+    public verticalMaxStep: number;
+
+    // push away by weapons
+    public force: number;
+    public forceDecay: number;
 
     // keyboard configurations
-    private keyUp: cc.KeyCode;
-    private keyDown: cc.KeyCode;
-    private keyLeft: cc.KeyCode;
-    private keyRight: cc.KeyCode;
-    private keySprint: cc.KeyCode;
+    public keyUp: cc.KeyCode;
+    public keyDown: cc.KeyCode;
+    public keyLeft: cc.KeyCode;
+    public keyRight: cc.KeyCode;
+    public keySprint: cc.KeyCode;
 
     // backpack
     private _backpack: Backpack;
@@ -69,19 +72,18 @@ export class PlayerController extends cc.Component {
     private set backpack(value: Backpack) { this._backpack = value; }
 
     // weapon
-    private weapon: cc.Node;
+    private _weapon: cc.Node;
+    public get weapon(): cc.Node { return this._weapon; }
+    private set weapon(value: cc.Node) { this._weapon = value; }
 
     // hp
-    private _hp: number;
-    public get hp() { return this._hp; }
-    private set hp(value: number) { this._hp = value; }
+    public hp: number;
     public maxHp: number;
 
     onLoad () {
-        // initializations
         this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
-        this._uiTransform = this.getComponent(cc.UITransform);
+        this.uiTransform = this.getComponent(cc.UITransform);
 
         this.moveLeft = false;
         this.moveRight = false;
@@ -96,11 +98,17 @@ export class PlayerController extends cc.Component {
         this.allowSprint = true;
         this.sprintStep = 60;
         this.curSprintTime = 0;
-        this.maxSprintTime = 0.15;
+        this.sprintTime = 0.15;
+        this.curSprintCD = 0;
+        this.sprintCD = 2;
+        this.sprintDirection = 0;
 
         this.horizontalStep = 10;
         this.verticalStep = 30;
         this.verticalMaxStep = 100;
+
+        this.force = 0;
+        this.forceDecay = 100;
 
         this.keyUp = cc.KeyCode.KEY_W;
         this.keyDown = cc.KeyCode.KEY_S;
@@ -182,9 +190,11 @@ export class PlayerController extends cc.Component {
                 if (!this.allowSprint) {
                     break;
                 }
-                // only sprint if not currently sprinting and has x-direction speed
-                if (this.curSprintTime == 0 && this.rigidBody.linearVelocity.x != 0) {
-                    this.curSprintTime = this.maxSprintTime;
+                // only sprint if sprint finish cooldown and has x-direction speed
+                if (this.curSprintCD == 0 && this.rigidBody.linearVelocity.x != 0) {
+                    this.curSprintTime = this.sprintTime;
+                    this.curSprintCD = this.sprintCD;
+                    this.sprintDirection = this.facingright ? 1 : -1;
                 }
                 break;
         }
@@ -218,10 +228,11 @@ export class PlayerController extends cc.Component {
     update (deltaTime: number) {
         var velocity: cc.Vec2 = null;
         if (this.curSprintTime > 0) {
-            // if is currently sprinting then set velocity to sprint velocity with the same direction as current movement
-            velocity = new cc.Vec2(this.rigidBody.linearVelocity.x > 0 ? this.sprintStep : -this.sprintStep, 0);
-            this.curSprintTime = Math.max(this.curSprintTime - deltaTime, 0);
+            // if currently sprinting then sprint
+            velocity = new cc.Vec2( this.sprintStep * this.sprintDirection, 0);
         } else {
+            // reset sprint direction
+
             // x direction velocity is reset to 0 and then calculated
             velocity = new cc.Vec2(0, this.rigidBody.linearVelocity.y);
             if (this.moveLeft) velocity.x -= this.horizontalStep;
@@ -241,9 +252,19 @@ export class PlayerController extends cc.Component {
             // make sure y direction has speed less than this.verticalMaxStep
             velocity.y = Math.min(Math.max(velocity.y, -this.verticalMaxStep), this.verticalMaxStep);
         }
+        // apply effects from weapon pushing
+        velocity.x += this.force;
+        if (this.force > 0) {
+            this.force = Math.max(this.force - deltaTime * this.forceDecay, 0);
+        } else if (this.force < 0) {
+            this.force = Math.min(this.force + deltaTime * this.forceDecay, 0);
+        }
         // update the velocity of the player
         this.rigidBody.linearVelocity = velocity;
         this.jump = false;
+        // subtract passed time from cooldowns
+        this.curSprintTime = Math.max(this.curSprintTime - deltaTime, 0);
+        this.curSprintCD = Math.max(this.curSprintCD - deltaTime, 0);
     }
 }
 
