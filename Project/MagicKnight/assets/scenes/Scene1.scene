@@ -26,7 +26,7 @@
     "_prefab": null,
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 728
+      "__id__": 729
     },
     "_id": "bdb0a36a-cf93-475e-af90-1192784d8f74"
   },
@@ -126,19 +126,19 @@
         "__id__": 5
       },
       {
-        "__id__": 722
+        "__id__": 723
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 725
-      },
-      {
         "__id__": 726
       },
       {
         "__id__": 727
+      },
+      {
+        "__id__": 728
       }
     ],
     "_prefab": null,
@@ -195,6 +195,9 @@
     "_components": [
       {
         "__id__": 721
+      },
+      {
+        "__id__": 722
       }
     ],
     "_prefab": null,
@@ -217,7 +220,7 @@
       "y": 1,
       "z": 1
     },
-    "_layer": 1073741824,
+    "_layer": 33554432,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -957,7 +960,7 @@
       "y": 1,
       "z": 1
     },
-    "_layer": 1073741824,
+    "_layer": 33554432,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -25613,7 +25616,7 @@
       "y": 1,
       "z": 1
     },
-    "_layer": 1073741824,
+    "_layer": 33554432,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -25790,7 +25793,7 @@
       "y": 1,
       "z": 1
     },
-    "_layer": 1073741824,
+    "_layer": 33554432,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -25837,7 +25840,7 @@
       "y": 1,
       "z": 1
     },
-    "_layer": 1073741824,
+    "_layer": 33554432,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -26011,7 +26014,7 @@
       "y": 1,
       "z": 1
     },
-    "_layer": 1073741824,
+    "_layer": 33554432,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -26190,6 +26193,45 @@
     "_id": "2dt3i3ybxCeaeNZIoig6gD"
   },
   {
+    "__type__": "cc.Sprite",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 5
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_visFlags": 0,
+    "_customMaterial": null,
+    "_srcBlendFactor": 2,
+    "_dstBlendFactor": 4,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_spriteFrame": {
+      "__uuid__": "56af7ba5-10d3-4299-af88-22d846f0d953@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "_type": 2,
+    "_fillType": 0,
+    "_sizeMode": 0,
+    "_fillCenter": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_fillStart": 0,
+    "_fillRange": 0,
+    "_isTrimmedMode": true,
+    "_useGrayscale": false,
+    "_atlas": null,
+    "_id": "f7wE17wYxKNazY6uUsQAbw"
+  },
+  {
     "__type__": "cc.Node",
     "_name": "Camera",
     "_objFlags": 0,
@@ -26200,10 +26242,10 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 723
+        "__id__": 724
       },
       {
-        "__id__": 724
+        "__id__": 725
       }
     ],
     "_prefab": null,
@@ -26240,7 +26282,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 722
+      "__id__": 723
     },
     "_enabled": true,
     "__prefab": null,
@@ -26248,7 +26290,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 605.7322834645669,
+    "_orthoHeight": 370.65963060686016,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -26281,7 +26323,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 722
+      "__id__": 723
     },
     "_enabled": true,
     "__prefab": null,
@@ -26322,7 +26364,7 @@
     "_enabled": true,
     "__prefab": null,
     "_cameraComponent": {
-      "__id__": 723
+      "__id__": 724
     },
     "_alignCanvasWithScreen": true,
     "_id": "6cyCqFcK9BvY0QZWl40mR4"
@@ -26359,16 +26401,16 @@
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 729
-    },
-    "shadows": {
       "__id__": 730
     },
-    "_skybox": {
+    "shadows": {
       "__id__": 731
     },
-    "fog": {
+    "_skybox": {
       "__id__": 732
+    },
+    "fog": {
+      "__id__": 733
     }
   },
   {

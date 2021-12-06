@@ -96,7 +96,7 @@
       "__expectedType__": "cc.SpriteFrame"
     },
     "mapSpriteFrame": {
-      "__uuid__": "5103ac43-0925-49f2-b928-48953a3d91a3@f9941",
+      "__uuid__": "56af7ba5-10d3-4299-af88-22d846f0d953@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_id": "40UMN2g19LGYQkHAM0csBX"
@@ -300,7 +300,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 370.65963060686016,
+    "_orthoHeight": 376.9633507853403,
     "_near": 1,
     "_far": 2000,
     "_color": {

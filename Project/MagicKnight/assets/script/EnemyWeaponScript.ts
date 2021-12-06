@@ -42,6 +42,7 @@ export class EnemyWeaponScript extends cc.Component {
     private initialRotation: number;
     private curAttackTime: number;
     private maxAttackTime: number;
+    private canDamage: boolean;
 
     attackRadius: number;
 
@@ -72,6 +73,7 @@ export class EnemyWeaponScript extends cc.Component {
         this.initialRotation = -25;
         this.curAttackTime = 0;
         this.maxAttackTime = 0.15;
+        this.canDamage = true;
 
         this.attackRadius = 70;
 
@@ -96,21 +98,19 @@ export class EnemyWeaponScript extends cc.Component {
 
 
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
-        if (otherCollider.node.name == "Player" && this.curAttackTime > 0) {
+        if (otherCollider.node.name == "Player" && this.curAttackTime > 0 && this.canDamage) {
+            this.canDamage = false;
             this.objectForced = otherCollider.node;
             this.curForceTime = this.maxForceTime;
             EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
-                AttackPlayerEventType.PHYSICAL_ATTACK, 10
+                AttackPlayerEventType.PHYSICAL_ATTACK, 20
             ));
         }
     }
 
     update (deltaTime: number) {
-        this.curCdtime = Math.max(this.curCdtime - deltaTime, 0);
-        if (this.curAttackTime == 0 && Math.abs(this.SoldierScript.distanceBetween) < this.attackRadius && this.curCdtime == 0 && !this.SoldierScript.isOutOfBound) {
-            this.curAttackTime = this.maxAttackTime;
-            this.curCdtime = this.attackCd;
-        }
+        // if finish attacking then allow giving damage to player
+        if (this.curAttackTime == 0) this.canDamage = true;
 
         // enable collider when attacking
         if (this.curAttackTime > 0) {
@@ -145,6 +145,13 @@ export class EnemyWeaponScript extends cc.Component {
             this.curForceTime -= deltaTime;
         } else {
             this.curForceTime = 0;
+        }
+
+        // decide if attack
+        this.curCdtime = Math.max(this.curCdtime - deltaTime, 0);
+        if (this.curAttackTime == 0 && Math.abs(this.SoldierScript.distanceBetween) < this.attackRadius && this.curCdtime == 0 && !this.SoldierScript.isOutOfBound) {
+            this.curAttackTime = this.maxAttackTime;
+            this.curCdtime = this.attackCd;
         }
     }
 }

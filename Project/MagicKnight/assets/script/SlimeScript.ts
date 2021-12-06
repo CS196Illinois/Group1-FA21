@@ -64,8 +64,8 @@ export class SlimeScript extends cc.Component {
         this.sprintToRight = true;
         this.sprintStep = 25;
         this.curSprintTime = 0;
-        this.maxSprintTime = 0.25;
-        this.attackDistance = 110;
+        this.maxSprintTime = 0.5;
+        this.attackDistance = 200;
         this.attackCD = 0;
 
         this.sprintCB = 2;
@@ -120,11 +120,15 @@ export class SlimeScript extends cc.Component {
         }
 
         if (this.curSprintTime > 0) {
+            // sprint
             if (this.sprintToRight) {
                 velocity.x = this.sprintStep
             } else {
                 velocity.x = - this.sprintStep;
             }
+            // jump
+            this.getComponent(cc.RigidBody2D).applyLinearImpulseToCenter(new cc.Vec2(0, 100), true);
+            // maximize remaining sprint time
             this.curSprintTime = Math.max(this.curSprintTime - deltaTime, 0);
         } else if (verticalDistance > this.maxVerticalDistance || horizontalDistance > this.maxHorizontalDistance) {
             velocity.x = 0;
