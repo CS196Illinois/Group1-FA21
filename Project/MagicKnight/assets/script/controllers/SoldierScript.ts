@@ -1,8 +1,7 @@
-
 import * as cc from 'cc';
 const { ccclass, property } = cc._decorator;
-import { Weapon } from './Item';
-import { WeaponScript } from './WeaponScript';
+import { Weapon } from 'db://assets/script/others/Item';
+
 /**
  * Predefined variables
  * Name = SoldierScript

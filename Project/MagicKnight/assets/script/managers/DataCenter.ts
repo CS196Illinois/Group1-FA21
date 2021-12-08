@@ -1,6 +1,5 @@
-
-import { _decorator, Component, Node, game, sys } from 'cc';
-const { ccclass, property } = _decorator;
+import * as cc from 'cc';
+const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables
@@ -28,15 +27,15 @@ let currentSlotNumber = 1
 let currentSlotData: { [key: string]: any } = {}
 
 function getSlot(slotNumber: number): null | string {
-    return sys.localStorage.getItem(SLOT_STORAGE_PREFIX + slotNumber)
+    return cc.sys.localStorage.getItem(SLOT_STORAGE_PREFIX + slotNumber)
 }
 
 function setSlot(slotNumber: number, data: string) {
-    sys.localStorage.setItem(SLOT_STORAGE_PREFIX + slotNumber, data)
+    cc.sys.localStorage.setItem(SLOT_STORAGE_PREFIX + slotNumber, data)
 }
 
 function clearSlot(slotNumber: number) {
-    sys.localStorage.removeItem(SLOT_STORAGE_PREFIX + slotNumber)
+    cc.sys.localStorage.removeItem(SLOT_STORAGE_PREFIX + slotNumber)
 }
 
 export const DataCenter = {

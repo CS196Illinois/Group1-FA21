@@ -1,9 +1,9 @@
 
-import { _decorator, Component, Node, Prefab, instantiate, Button, Label, EventHandler, find, game } from 'cc';
-import { DataCenter } from './DataCenter';
-import { EventManager } from './events/EventManager';
-import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
-const { ccclass, property } = _decorator;
+import * as cc from 'cc';
+import { DataCenter } from 'db://assets/script/managers/DataCenter';
+import { EventManager } from 'db://assets/script/events/EventManager';
+import { LoadSceneEvent, LoadSceneEventType } from 'db://assets/script/events/LoadSceneEvent';
+const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables
@@ -36,7 +36,7 @@ function createNewGameMenu(): MenuItem[] {
 }
  
 @ccclass('StartMenuManager')
-export class StartMenuManager extends Component {
+export class StartMenuManager extends cc.Component {
     // [1]
     // dummy = '';
 
@@ -44,17 +44,17 @@ export class StartMenuManager extends Component {
     // @property
     // serializableDummy = 0;
 
-    @property({type: Node})
-    public buttonArea: Node | null = null
+    @property({type: cc.Node})
+    public buttonArea: cc.Node | null = null
 
-    @property({ type: Prefab })
-    public buttonPrefab: Node | null = null
+    @property({ type: cc.Prefab })
+    public buttonPrefab: cc.Node | null = null
 
-    @property({ type: Prefab })
-    public newSlotPrefab: Node | null = null
+    @property({ type: cc.Prefab })
+    public newSlotPrefab: cc.Node | null = null
 
-    @property({ type: Prefab })
-    public usedSlotPrefab: Node | null = null
+    @property({ type: cc.Prefab })
+    public usedSlotPrefab: cc.Node | null = null
 
     buttonSpace: number = 70
 
@@ -108,37 +108,37 @@ export class StartMenuManager extends Component {
 
             if (item.type == "new-slot") {
                 // add button from prefab and adjust position
-                const button = instantiate(this.newSlotPrefab);
+                const button = cc.instantiate(this.newSlotPrefab);
                 this.buttonArea?.addChild(button);
                 button.setPosition(0, currentOffset, 0)
                 currentOffset -= 120
                 
                 // set button label
-                const label = button.getComponentInChildren(Label);
+                const label = button.getComponentInChildren(cc.Label);
                 label.string = item.label
 
                 button.on("click", item.callback)
             } else if (item.type == "used-slot") {
                 // add button from prefab and adjust position
-                const button = instantiate(this.usedSlotPrefab);
+                const button = cc.instantiate(this.usedSlotPrefab);
                 this.buttonArea?.addChild(button);
                 button.setPosition(0, currentOffset, 0)
                 currentOffset -= 120
                 
                 // set button label
-                const label = button.getComponentInChildren(Label);
+                const label = button.getComponentInChildren(cc.Label);
                 label.string = item.label
 
                 button.on("click", item.callback)
             } else {
                 // add button from prefab and adjust position
-                const button = instantiate(this.buttonPrefab);
+                const button = cc.instantiate(this.buttonPrefab);
                 this.buttonArea?.addChild(button);
                 button.setPosition(0, currentOffset, 0)
                 currentOffset -= 70
 
                 // set button label
-                const label = button.getComponentInChildren(Label);
+                const label = button.getComponentInChildren(cc.Label);
                 label.string = item.label
 
                 // set button callback

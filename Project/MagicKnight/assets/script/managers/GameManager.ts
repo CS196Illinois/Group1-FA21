@@ -1,13 +1,11 @@
-
 import * as cc from 'cc';
+import { LoadSceneEvent, LoadSceneEventType } from 'db://assets/script/events/LoadSceneEvent';
+import { EventManager } from 'db://assets/script/events/EventManager';
+import { DataCenter } from 'db://assets/script/managers/DataCenter';
+import { PlayerController } from 'db://assets/script/controllers/PlayerController';
+import { SlimeScript } from 'db://assets/script/controllers/SlimeScript';
+import { SoldierScript } from 'db://assets/script/controllers/SoldierScript';
 const { ccclass, property } = cc._decorator;
-
-import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
-import * as e from './events/EventManager';
-import { DataCenter } from './DataCenter';
-import { PlayerController } from './PlayerController';
-import { SlimeScript } from './SlimeScript';
-import { SoldierScript } from './SoldierScript';
 
 /**
  * Predefined variables
@@ -30,11 +28,17 @@ export class GameManager extends cc.Component {
     @property({ type: cc.SpriteFrame })
     public playerSpriteFrame: cc.SpriteFrame;
 
+    private eventId: number = null;
+
     onLoad() {
         cc.game.addPersistRootNode(this.node);
-        e.EventManager.instance.on("LoadScene", (event: LoadSceneEvent) => { this.loadScene(event) });
+        this.eventId = EventManager.instance.on("LoadScene", (event: LoadSceneEvent) => { this.loadScene(event) });
         // cocos bug
         cc.macro.ENABLE_TILEDMAP_CULLING = false;
+    }
+
+    onDestroy() {
+        EventManager.instance.off("LoadScene", this.eventId);
     }
 
     loadScene(event: LoadSceneEvent) {
@@ -115,10 +119,9 @@ export class GameManager extends cc.Component {
         npc.children.forEach(node => {});
 
         // map configurations
-        // let mapSprite = map.getComponent(cc.Sprite);
-        // mapSprite.type = cc.Sprite.Type.TILED;
-        // mapSprite.spriteFrame = this.mapSpriteFrame;
-        // console.log(map);
+        let mapSprite = map.getComponent(cc.Sprite);
+        mapSprite.type = cc.Sprite.Type.TILED;
+        mapSprite.spriteFrame = this.mapSpriteFrame;
     }
 }
 

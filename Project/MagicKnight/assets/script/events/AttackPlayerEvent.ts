@@ -1,7 +1,6 @@
-
-import { _decorator, Component, Node } from 'cc';
-import { BaseEvent } from './EventManager';
-const { ccclass, property } = _decorator;
+import * as cc from 'cc';
+import { BaseEvent } from 'db://assets/script/events/EventManager';
+const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables

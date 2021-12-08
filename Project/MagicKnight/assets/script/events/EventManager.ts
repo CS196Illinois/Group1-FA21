@@ -1,5 +1,5 @@
-
 import * as cc from 'cc';
+import { IdGenerator } from 'db://assets/script/others/Utils';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -13,14 +13,6 @@ const { ccclass, property } = cc._decorator;
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
-
-let nextId = 0
-
-function getNextId() {
-    const id = nextId
-    nextId += 1
-    return id
-}
 
 export class EventManager {
     // singleton instance
@@ -37,7 +29,7 @@ export class EventManager {
         if (this.listeners[tag] == null) {
             this.listeners[tag] = new Map();
         }
-        const id = getNextId()
+        const id = IdGenerator.generate();
         this.listeners[tag].set(id, listener);
         return id
     }

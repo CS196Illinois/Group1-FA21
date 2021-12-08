@@ -1,6 +1,5 @@
-
 import * as cc from 'cc';
-import { Item, ItemType } from './Item';
+import { Item, ItemType } from 'db://assets/script/others/Item';
 const { ccclass, property } = cc._decorator;
 
 /**

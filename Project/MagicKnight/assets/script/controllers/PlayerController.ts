@@ -1,13 +1,12 @@
-
 import * as cc from 'cc';
 const { ccclass, property } = cc._decorator;
 
-import { LoadSceneEvent, LoadSceneEventType } from './events/LoadSceneEvent';
-import * as e from './events/EventManager';
-import { Backpack } from './BackpackController';
-import { Weapon } from './Item';
-import { AttackPlayerEvent, AttackPlayerEventType } from './events/AttackPlayerEvent';
-import { HPChangeEvent, HPChangeEventType } from './events/HPChangeEvent';
+import { LoadSceneEvent, LoadSceneEventType } from 'db://assets/script/events/LoadSceneEvent';
+import * as e from 'db://assets/script/events/EventManager';
+import { Backpack } from 'db://assets/script/controllers/BackpackController';
+import { Weapon } from 'db://assets/script/others/Item';
+import { AttackPlayerEvent, AttackPlayerEventType } from 'db://assets/script/events/AttackPlayerEvent';
+import { HPChangeEvent, HPChangeEventType } from 'db://assets/script/events/HPChangeEvent';
 
 /**
  * Predefined variables
@@ -141,14 +140,14 @@ export class PlayerController extends cc.Component {
         // add a key up listener
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         // add a collision listener (invoke callback after collision is solved)
-        this.eventId = e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event))
+        this.eventId = e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event));
         if (this.collider) {
             this.collider.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
         }
     }
 
     onDestroy () {
-        e.EventManager.instance.off("AttackPlayer", this.eventId)
+        e.EventManager.instance.off("AttackPlayer", this.eventId);
     }
 
     onAttack (event: AttackPlayerEvent) {

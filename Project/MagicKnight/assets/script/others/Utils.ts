@@ -1,32 +1,23 @@
 import * as cc from 'cc';
-import { BaseEvent } from 'db://assets/script/events/EventManager';
 const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables
- * Name = HPChangeEvent
- * DateTime = Sat Dec 04 2021 19:32:33 GMT-0600 (北美中部标准时间)
- * Author = Kaicheng
- * FileBasename = HPChangeEvent.ts
- * FileBasenameNoExtension = HPChangeEvent
- * URL = db://assets/script/events/HPChangeEvent.ts
+ * Name = Utils
+ * DateTime = Tue Dec 07 2021 18:07:29 GMT-0600 (Central Standard Time)
+ * Author = cty012
+ * FileBasename = Utils.ts
+ * FileBasenameNoExtension = Utils
+ * URL = db://assets/script/others/Utils.ts
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
 
-export class HPChangeEvent extends BaseEvent {
-    // self defined properties
-    public hp: number;
-
-    constructor(type: HPChangeEventType, hp: number) {
-        // name is a property of BaseEvent
-        super(type);
-        this.hp = hp;
+export class IdGenerator {
+    private static nextId: number = 0;
+    static generate(): number {
+        return IdGenerator.nextId++;
     }
-}
-
-export enum HPChangeEventType {
-    HP_CHANGE= "hp-change",
 }
 
 /**

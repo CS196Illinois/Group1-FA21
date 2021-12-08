@@ -1,7 +1,4 @@
-
 import * as cc from 'cc';
-import { Vec3 } from 'cc';
-//import { _decorator, Component, Node, CCObject } from 'cc';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -49,12 +46,12 @@ export class CameraMovement extends cc.Component {
     }
 
     // Transformation between the map and camera coordinate systems
-    public mapToCameraCoords(position: Vec3): Vec3 {
-        return new Vec3(position.x - this.size.width / 2, position.y - this.size.height / 2, position.z);
+    public mapToCameraCoords(position: cc.Vec3): cc.Vec3 {
+        return new cc.Vec3(position.x - this.size.width / 2, position.y - this.size.height / 2, position.z);
     }
 
-    public cameraToMapCoords(position: Vec3): Vec3 {
-        return new Vec3(position.x + this.size.width / 2, position.y + this.size.height / 2, position.z);
+    public cameraToMapCoords(position: cc.Vec3): cc.Vec3 {
+        return new cc.Vec3(position.x + this.size.width / 2, position.y + this.size.height / 2, position.z);
     }
 
     // Custom lerp function
@@ -67,9 +64,9 @@ export class CameraMovement extends cc.Component {
 
     // Make sure the position is within the bounds of the map
     // Uses map coordinates
-    private clamp(position: Vec3): Vec3 {
+    private clamp(position: cc.Vec3): cc.Vec3 {
         let mapSize = this.map.getComponent(cc.UITransform).contentSize
-        let result = new Vec3(0, 0, position.z);
+        let result = new cc.Vec3(0, 0, position.z);
         result.x = cc.misc.clampf(position.x, this.size.width / 2, mapSize.width - this.size.width / 2);
         result.y = cc.misc.clampf(position.y, this.size.height / 2, mapSize.height - this.size.height / 2);
         return result;

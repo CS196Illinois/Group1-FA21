@@ -1,8 +1,6 @@
-
 import * as cc from 'cc';
+import { BaseEvent } from 'db://assets/script/events/EventManager';
 const { ccclass, property } = cc._decorator;
-
-import * as e from './EventManager';
 
 /**
  * Predefined variables
@@ -17,7 +15,7 @@ import * as e from './EventManager';
  */
 
 // LoadSceneEvent is for loading or preloading a scene
-export class LoadSceneEvent extends e.BaseEvent {
+export class LoadSceneEvent extends BaseEvent {
     // self defined properties
     private _scene: string;
     public get scene(): string { return this._scene; }

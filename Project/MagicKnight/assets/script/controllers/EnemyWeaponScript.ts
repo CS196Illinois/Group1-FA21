@@ -1,10 +1,8 @@
-
 import * as cc from 'cc';
-import { AttackPlayerEvent, AttackPlayerEventType } from './events/AttackPlayerEvent';
-import { EventManager } from './events/EventManager';
-import { PlayerController } from './PlayerController';
-import { SlimeScript } from './SlimeScript';
-import { SoldierScript } from './SoldierScript';
+import { AttackPlayerEvent, AttackPlayerEventType } from 'db://assets/script/events/AttackPlayerEvent';
+import { EventManager } from 'db://assets/script/events/EventManager';
+import { PlayerController } from 'db://assets/script/controllers/PlayerController';
+import { SoldierScript } from 'db://assets/script/controllers/SoldierScript';
 const { ccclass, property } = cc._decorator;
 
 /**

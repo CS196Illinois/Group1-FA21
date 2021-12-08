@@ -1,6 +1,5 @@
-
-import { _decorator, Component, Node } from 'cc';
-const { ccclass, property } = _decorator;
+import * as cc from 'cc';
+const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables
@@ -13,8 +12,7 @@ const { ccclass, property } = _decorator;
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
- 
-@ccclass('Item')
+
 export class Item {
     public name: string;
     private _type: ItemType;
