@@ -1,4 +1,6 @@
 import * as cc from 'cc';
+import * as utils from 'db://assets/script/others/Utils';
+import { MapController } from 'db://assets/script/controllers/MapController';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -15,32 +17,25 @@ const { ccclass, property } = cc._decorator;
  
 @ccclass('CameraMovement')
 export class CameraMovement extends cc.Component {
-    @property ({
-        type: cc.Node,
-        displayName: "PlayerNode",
-    })
-    player: cc.Node;
-    private playerUITransform: cc.UITransform
-
-    @property ({
-        type: cc.CCFloat,
-        displayName: "FollowSpeed"
-    })
-    speed: number = 5;
-
-    private size: cc.Size;
     private map: cc.Node;
+    private target: cc.Node;
+    private size: cc.Size;
+    public speed: number;
 
     onLoad() {
-        this.playerUITransform = this.player.getComponent(cc.UITransform);
         let canvas = cc.find("Canvas");
         this.map = canvas.getChildByName("Map");
+        this.target = this.map.getChildByName("Player");
         this.size = canvas.getComponent(cc.UITransform).contentSize;
+        this.speed = 5;
     }
 
     start() {
         // Instantly teleport to player's position (doesn't work)
-        let playerPosition = this.mapToCameraCoords(this.clamp(this.getTargetPosition()));
+        let playerPosition = this.mapToCameraCoords(this.map.getComponent(MapController).clamp(
+            this.getTargetPosition(),
+            utils.Padding.splitSize(this.size)
+        ));
         playerPosition.z = this.node.getPosition().z;
         this.node.setPosition(playerPosition);
     }
@@ -54,30 +49,13 @@ export class CameraMovement extends cc.Component {
         return new cc.Vec3(position.x + this.size.width / 2, position.y + this.size.height / 2, position.z);
     }
 
-    // Custom lerp function
-    private static lerp(from: cc.Vec3, to: cc.Vec3, ratio: number) {
-        let target = from.clone();
-        target.x += ratio * (to.x - from.x);
-        target.y += ratio * (to.y - from.y);
-        return target;
-    }
-
-    // Make sure the position is within the bounds of the map
-    // Uses map coordinates
-    private clamp(position: cc.Vec3): cc.Vec3 {
-        let mapSize = this.map.getComponent(cc.UITransform).contentSize
-        let result = new cc.Vec3(0, 0, position.z);
-        result.x = cc.misc.clampf(position.x, this.size.width / 2, mapSize.width - this.size.width / 2);
-        result.y = cc.misc.clampf(position.y, this.size.height / 2, mapSize.height - this.size.height / 2);
-        return result;
-    }
-
     // Get the position of the player in map coordinates
     private getTargetPosition() {
-        let targetPosition = this.player.getPosition().clone();
+        let targetPosition = this.target.getPosition().clone();
         // find the center of the player
-        targetPosition.x += this.playerUITransform.contentSize.width / 2;
-        targetPosition.y += this.playerUITransform.contentSize.height / 2;
+        let targetSize = this.target.getComponent(cc.UITransform).contentSize;
+        targetPosition.x += targetSize.width / 2;
+        targetPosition.y += targetSize.height / 2;
         return targetPosition;
     }
 
@@ -89,7 +67,10 @@ export class CameraMovement extends cc.Component {
 
         // make the camera move towards player's position at a ratio determined by dt
         // clamp AFTER the lerp to get better effect
-        let nextPosition = this.clamp(CameraMovement.lerp(currentPosition, targetPosition, deltaTime * this.speed));
+        let nextPosition = this.map.getComponent(MapController).clamp(
+            utils.lerp2D(currentPosition, targetPosition, deltaTime * this.speed),
+            utils.Padding.splitSize(this.size)
+        );
 
         // update the position
         this.node.setPosition(this.mapToCameraCoords(nextPosition));

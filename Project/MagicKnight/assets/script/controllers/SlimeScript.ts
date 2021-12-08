@@ -2,6 +2,7 @@ import * as cc from 'cc';
 import { AttackPlayerEvent, AttackPlayerEventType } from 'db://assets/script/events/AttackPlayerEvent';
 import { EventManager } from 'db://assets/script/events/EventManager';
 import { PlayerController } from 'db://assets/script/controllers/PlayerController';
+import * as utils from 'db://assets/script/others/Utils';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -107,8 +108,7 @@ export class SlimeScript extends cc.Component {
             }
             // push player if is currently sprinting
             if (this.curSprintTime > 0) {
-                let direction = otherCollider.node.position.x > this.node.position.x ? 1 : -1;
-                console.log(direction);
+                let direction = utils.getDirection(otherCollider.node.position, this.node.parent.position).x;
                 otherCollider.getComponent(PlayerController).force = this.push * direction;
             }
             // reset sprint time

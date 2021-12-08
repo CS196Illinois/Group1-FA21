@@ -2,6 +2,7 @@ import * as cc from 'cc';
 import { PlayerController } from 'db://assets/script/controllers/PlayerController';
 import { SlimeScript } from 'db://assets/script/controllers/SlimeScript';
 import { SoldierScript } from 'db://assets/script/controllers/SoldierScript';
+import * as utils from 'db://assets/script/others/Utils';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -96,12 +97,12 @@ export class WeaponScript extends cc.Component {
             return
         } else if (otherCollider.node.parent.name == "Slime") {
             let slimeScript = otherCollider.getComponent(SlimeScript);
-            let direction = otherCollider.node.position.x > this.node.parent.position.x ? 1 : -1;
+            let direction = utils.getDirection(otherCollider.node.position, this.node.parent.position).x;
             slimeScript.force = this.push / slimeScript.forceResist * direction;
             slimeScript.resetCurSprintCD();
         } else if (otherCollider.node.parent.name == "Soldier") {
             let soldierScript = otherCollider.getComponent(SoldierScript);
-            let direction = otherCollider.node.position.x > this.node.parent.position.x ? 1 : -1;
+            let direction = utils.getDirection(otherCollider.node.position, this.node.parent.position).x;
             soldierScript.force = this.push / soldierScript.forceResist * direction;
         }
     }
