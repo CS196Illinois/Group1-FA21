@@ -22,15 +22,6 @@ const { ccclass, property } = cc._decorator;
  
 @ccclass('GameManager')
 export class GameManager extends cc.Component {
-    @property({ type: cc.SpriteFrame })
-    public mapSpriteFrame: cc.SpriteFrame;
-    @property({ type: cc.SpriteFrame })
-    public terrainSpriteFrame: cc.SpriteFrame;
-    @property({ type: cc.SpriteFrame })
-    public playerSpriteFrame: cc.SpriteFrame;
-    @property({ type: cc.SpriteFrame })
-    public slimeSpriteFrame: cc.SpriteFrame;
-
     private eventId: number = null;
 
     onLoad() {
@@ -101,10 +92,12 @@ export class GameManager extends cc.Component {
             let rigidBody = node.getComponent(cc.RigidBody2D);
             rigidBody.type = cc.ERigidBody2DType.Static;
             rigidBody.gravityScale = 0;
-            // image
-            let terrainSprite = node.getComponent(cc.Sprite);
-            terrainSprite.type = cc.Sprite.Type.TILED;
-            terrainSprite.spriteFrame = this.terrainSpriteFrame;
+            // update image
+            cc.resources.load("images/terrain/spriteFrame", cc.SpriteFrame, (err, spriteFrame) => {
+                let terrainSprite = node.getComponent(cc.Sprite);
+                terrainSprite.type = cc.Sprite.Type.TILED;
+                terrainSprite.spriteFrame = spriteFrame;
+            });
         });
 
         // specific configurations for characters
@@ -121,9 +114,6 @@ export class GameManager extends cc.Component {
 
         // map configurations
         map.addComponent(MapController);
-        let mapSprite = map.getComponent(cc.Sprite);
-        mapSprite.type = cc.Sprite.Type.TILED;
-        mapSprite.spriteFrame = this.mapSpriteFrame;
     }
 }
 

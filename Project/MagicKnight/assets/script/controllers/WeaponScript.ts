@@ -25,7 +25,7 @@ export class WeaponScript extends cc.Component {
     // [2]
     // @property
     // serializableDummy = 0;
-    rigidBody: cc.RigidBody2D;
+    // rigidBody: cc.RigidBody2D;
     collider: cc.Collider2D;
     uiTransform: cc.UITransform;
     player: cc.Node;
@@ -36,8 +36,8 @@ export class WeaponScript extends cc.Component {
     isCollide: boolean;
 
     //attack
-    private rotateStep: number;
     private initialRotation: number;
+    private finalRotation: number;
     private curAttackTime: number;
     private maxAttackTime: number;
 
@@ -51,7 +51,7 @@ export class WeaponScript extends cc.Component {
     private keyAttack: cc.KeyCode;
 
     onLoad () {
-        this.rigidBody = this.getComponent(cc.RigidBody2D);
+        // this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
         this.uiTransform = this.getComponent(cc.UITransform);
         this.player = this.node.getParent();
@@ -60,12 +60,12 @@ export class WeaponScript extends cc.Component {
         this.curRotateTime = 0;
         this.isCollide = false;
 
-        this.rotateStep = -30;
-        this.initialRotation = -25;
+        this.initialRotation = 20;
+        this.finalRotation = 170;
         this.curAttackTime = 0;
-        this.maxAttackTime = 0.15;
+        this.maxAttackTime = 0.12;
 
-        this.push = 20;
+        this.push = 40;
 
         this.weaponRightX = 40;
         this.weaponY = 30;
@@ -109,30 +109,23 @@ export class WeaponScript extends cc.Component {
 
     update (deltaTime: number) {
         // enable collider when attacking
-        if (this.curAttackTime > 0) {
-            this.collider.enabled = true;
-        } else {
-            this.collider.enabled = false;
-        }
+        this.collider.enabled = this.curAttackTime > 0;
         this.collider.apply();
 
-        // follow player
+        // set direction
         if (this.playerController.facingRight) {
             this.node.setPosition(this.weaponRightX, this.weaponY);
         } else {
-            this.node.setPosition(this.playerController.getComponent(cc.UITransform).contentSize.width - this.weaponRightX, this.weaponY);
+            this.node.setPosition(this.playerController.uiTransform.width - this.weaponRightX, this.weaponY);
         }
 
-        // attack
-        if (this.curAttackTime > 0) {
-            if (this.playerController.facingRight) this.rigidBody.angularVelocity = this.rotateStep;
-            if (!this.playerController.facingRight) this.rigidBody.angularVelocity = -this.rotateStep;
-            this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
-        } else {
-            this.rigidBody.angularVelocity = 0;
-            if (this.playerController.facingRight) this.node.setRotationFromEuler(0, 0, this.initialRotation);
-            if (!this.playerController.facingRight) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
-        }
+        // set rotation
+        let direction = this.playerController.facingRight? 1 : -1;
+        let progress = (this.curAttackTime == 0) ? 0 : 1 - this.curAttackTime / this.maxAttackTime;
+        this.node.setRotationFromEuler(0, 0, -direction * (this.initialRotation * (1 - progress) + this.finalRotation * progress));
+
+        // update cd
+        this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
     }
 }
 

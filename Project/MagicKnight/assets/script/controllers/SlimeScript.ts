@@ -41,7 +41,16 @@ export class SlimeScript extends cc.Component {
     uiTransform: cc.UITransform;
 
     // sprint
-    facingRight: boolean;
+    private _facingRight: boolean;
+    public get facingRight(): boolean { return this._facingRight; }
+    public set facingRight(value: boolean) {
+        if (this._facingRight == value) return;
+        this._facingRight = value;
+        // update image
+        if (this.spriteController == null) return;
+        this.spriteController.flipX = !this._facingRight;
+        this.spriteController.apply();
+    }
 
     sprintStep: number;
     curSprintTime: number;
@@ -64,7 +73,6 @@ export class SlimeScript extends cc.Component {
     // Image of the slime
     spriteNode: cc.Node;
     spriteController: SpriteController;
-    image: cc.SpriteFrame;
 
 
     onLoad() {
@@ -84,7 +92,7 @@ export class SlimeScript extends cc.Component {
 
         this.sprintStep = 25;
         this.curSprintTime = 0;
-        this.maxSprintTime = 0.7;
+        this.maxSprintTime = 0.4;
         this.attackDistance = 300;
         this.damageCD = 1;
         this.curDamageCD = 0;
@@ -98,18 +106,21 @@ export class SlimeScript extends cc.Component {
         this.forceResist = 0.8;
         this.forceDecay = 120;
 
-        let gameManager = cc.find("GameManager").getComponent(GameManager);
-        this.image = gameManager.slimeSpriteFrame;
+        cc.resources.preload("images/slime/spriteFrame");
         cc.resources.load("prefabs/Sprite", cc.Prefab, (err, spriteNode) => {
             // destroy own sprite
             this.node.getComponent(cc.Sprite)?.destroy();
             // add sprite child
+            this.facingRight = true;
             this.spriteNode = cc.instantiate(spriteNode);
             this.node.addChild(this.spriteNode);
             // update image
-            let sprite = this.spriteNode.getComponent(cc.Sprite);
-            sprite.type = cc.Sprite.Type.SIMPLE;
-            sprite.spriteFrame = this.image;
+            cc.resources.load("images/slime/spriteFrame", cc.SpriteFrame, (err, spriteFrame) => {
+                this.facingRight = true;
+                let sprite = this.spriteNode.getComponent(cc.Sprite);
+                sprite.type = cc.Sprite.Type.SIMPLE;
+                sprite.spriteFrame = spriteFrame;
+            });
             // get sprite controller
             this.spriteController = this.spriteNode.getComponent(SpriteController);
         });
@@ -143,15 +154,6 @@ export class SlimeScript extends cc.Component {
     updateDirection() {
         // always face the player
         this.facingRight = utils.getCenterDistance(this.node, this.player).x > 0;
-        // update image
-        if (this.spriteController != null) {
-            if (this.facingRight) {
-                this.spriteController.flipX = false;
-            } else {
-                this.spriteController.flipX = true;
-            }
-            this.spriteController.apply();
-        }
     }
 
     resetCurSprintCD() {
@@ -160,7 +162,7 @@ export class SlimeScript extends cc.Component {
 
     update (deltaTime: number) {
         let velocity: cc.Vec2 = this.rigidBody.linearVelocity;
-        let distanceBetween: number = utils.getCenterDistance(this.node, this.player).x;
+        let distanceCenterX: number = utils.getCenterDistance(this.node, this.player).x;
         let distance: cc.Vec3 = utils.getDistance(this.node, this.player);
 
         // update cooldowns
@@ -173,7 +175,7 @@ export class SlimeScript extends cc.Component {
         }
 
         // check if should sprint
-        if (Math.abs(distanceBetween) < this.attackDistance && this.curSprintTime == 0 && this.curSprintCD == 0 && Math.abs(distance.y) < this.maxVerticalDistance) {
+        if (Math.abs(distanceCenterX) < this.attackDistance && this.curSprintTime == 0 && this.curSprintCD == 0 && Math.abs(distance.y) < this.maxVerticalDistance) {
             this.curSprintTime = this.maxSprintTime;
             this.curSprintCD = this.sprintCD;
             // Jump
@@ -190,13 +192,13 @@ export class SlimeScript extends cc.Component {
             velocity.x = 0;
         } else {
             // Normal movement
-            if (distanceBetween > this.maxDistance) {
+            if (distanceCenterX > this.maxDistance) {
                 velocity.x = this.horizontalStep;
-            } else if (distanceBetween < -this.maxDistance) {
+            } else if (distanceCenterX < -this.maxDistance) {
                 velocity.x = -this.horizontalStep;
-            } else if (distanceBetween > 0 && distanceBetween + this.horizontalStepSlow <= this.maxDistance) {
+            } else if (distanceCenterX > 0 && distanceCenterX + this.horizontalStepSlow <= this.maxDistance) {
                 velocity.x = -this.horizontalStepSlow;
-            } else if (distanceBetween < 0 && distanceBetween - this.horizontalStepSlow >= -this.maxDistance) {
+            } else if (distanceCenterX < 0 && distanceCenterX - this.horizontalStepSlow >= -this.maxDistance) {
                 velocity.x = this.horizontalStepSlow;
             } else {
                 velocity.x = 0;

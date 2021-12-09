@@ -1,6 +1,7 @@
 import * as cc from 'cc';
-const { ccclass, property } = cc._decorator;
+import * as utils from 'db://assets/script/others/Utils';
 import { Weapon } from 'db://assets/script/others/Item';
+const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables
@@ -23,7 +24,7 @@ export class SoldierScript extends cc.Component {
     // @property
     // serializableDummy = 0;
 
-    player = null;
+    player: cc.Node;
 
     horizontalStep: number;
     maxDistance: number;
@@ -34,12 +35,10 @@ export class SoldierScript extends cc.Component {
     collider: cc.Collider2D;
     uiTransform: cc.UITransform;
 
-    facingright: boolean;
+    facingRight: boolean;
 
     // weapon
     weapon: cc.Node;
-
-    distanceBetween: number;
 
     isOutOfBound: boolean;
 
@@ -60,7 +59,7 @@ export class SoldierScript extends cc.Component {
         this.collider = this.getComponent(cc.Collider2D);
         this.uiTransform = this.getComponent(cc.UITransform);
 
-        this.facingright = true;
+        this.facingRight = true;
 
         let weaponItem = new Weapon("weapon", "SoldierWeapon");  // TODO: use weapon info from the data center
         cc.resources.load("prefabs/" + weaponItem.prefab, cc.Prefab, (err, weapon) => {
@@ -68,10 +67,6 @@ export class SoldierScript extends cc.Component {
             this.weapon = cc.instantiate(weapon);
             this.node.addChild(this.weapon);
         });
-
-        let playerwidth: number = this.player.getComponent(cc.UITransform).contentSize.width;
-        let enemywidth: number = this.uiTransform.contentSize.width;
-        this.distanceBetween = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
 
         this.isOutOfBound = true;
 
@@ -86,23 +81,18 @@ export class SoldierScript extends cc.Component {
 
     update (deltaTime: number) {
         let velocity: cc.Vec2 = this.rigidBody.linearVelocity;
-        let verticalDistance: number = Math.abs(this.player.position.y - this.node.position.y);
-        let horizontalDistance: number = Math.abs(this.player.position.x - this.node.position.x)
+        let distanceCenterX: number = utils.getCenterDistance(this.node, this.player).x;
+        let distance: cc.Vec3 = utils.getDistance(this.node, this.player);
 
-        let playerwidth: number = this.player.getComponent(cc.UITransform).contentSize.width;
-        let enemywidth: number = this.uiTransform.contentSize.width;
-        this.distanceBetween = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
+        this.facingRight = distanceCenterX > 0;
 
-        if (this.distanceBetween > 0) this.facingright = true;
-        if (this.distanceBetween < 0) this.facingright = false;
-
-        if (verticalDistance > this.maxVerticalDistance || horizontalDistance > this.maxHorizontalDistance) {
+        if (Math.abs(distance.y) > this.maxVerticalDistance || Math.abs(distance.x) > this.maxHorizontalDistance) {
             velocity.x = 0;
             this.isOutOfBound = true;
-        } else if (this.distanceBetween > this.maxDistance) {
+        } else if (distanceCenterX > this.maxDistance) {
             velocity.x = this.horizontalStep;
             this.isOutOfBound = false;
-        } else if (this.distanceBetween < -this.maxDistance) {
+        } else if (distanceCenterX < -this.maxDistance) {
             velocity.x = -this.horizontalStep;
             this.isOutOfBound = false;
         } else {

@@ -150,9 +150,9 @@
     },
     "tag": 0,
     "_group": 1,
-    "_density": 1,
+    "_density": 0,
     "_sensor": true,
-    "_friction": 0.2,
+    "_friction": 0,
     "_restitution": 0,
     "_offset": {
       "__type__": "cc.Vec2",
@@ -202,9 +202,9 @@
     "bullet": false,
     "awakeOnLoad": true,
     "_group": 1,
-    "_type": 1,
+    "_type": 3,
     "_allowSleep": true,
-    "_gravityScale": 1,
+    "_gravityScale": 0,
     "_linearDamping": 0,
     "_angularDamping": 0,
     "_linearVelocity": {
@@ -218,7 +218,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "01TT8MuihG27CxYD2ThVlE"
+    "fileId": "58udSHR0pA+IBdmCqWlDcD"
   },
   {
     "__type__": "cc.PrefabInfo",

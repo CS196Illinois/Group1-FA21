@@ -1,9 +1,9 @@
 import * as cc from 'cc';
+import * as utils from 'db://assets/script/others/Utils';
 import { AttackPlayerEvent, AttackPlayerEventType } from 'db://assets/script/events/AttackPlayerEvent';
 import { EventManager } from 'db://assets/script/events/EventManager';
 import { PlayerController } from 'db://assets/script/controllers/PlayerController';
 import { SoldierScript } from 'db://assets/script/controllers/SoldierScript';
-import * as utils from 'db://assets/script/others/Utils';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -26,19 +26,19 @@ export class EnemyWeaponScript extends cc.Component {
     // [2]
     // @property
     // serializableDummy = 0;
-    rigidBody: cc.RigidBody2D;
     collider: cc.Collider2D;
     uiTransform: cc.UITransform;
     soldier: cc.Node;
-    SoldierScript: SoldierScript;
+    soldierScript: SoldierScript;
+    player: cc.Node;
     maxRotateTime: number;
     curRotateTime: number;
 
     isCollide: boolean;
 
     //attack
-    private rotateStep: number;
     private initialRotation: number;
+    private finalRotation: number;
     private curAttackTime: number;
     private maxAttackTime: number;
     private canDamage: boolean;
@@ -57,17 +57,18 @@ export class EnemyWeaponScript extends cc.Component {
 
 
     onLoad () {
-        this.rigidBody = this.getComponent(cc.RigidBody2D);
         this.collider = this.getComponent(cc.Collider2D);
         this.uiTransform = this.getComponent(cc.UITransform);
         this.soldier = this.node.getParent();
-
+        this.soldierScript = this.soldier.getComponent(SoldierScript);
+        this.player = cc.find("Canvas/Map/Player");
         this.maxRotateTime = 0.2;
         this.curRotateTime = 0;
+
         this.isCollide = false;
 
-        this.rotateStep = -30;
-        this.initialRotation = -25;
+        this.initialRotation = 20;
+        this.finalRotation = 170;
         this.curAttackTime = 0;
         this.maxAttackTime = 0.15;
         this.canDamage = true;
@@ -84,7 +85,6 @@ export class EnemyWeaponScript extends cc.Component {
     }
 
     start () {
-        this.SoldierScript = this.soldier.getComponent(SoldierScript);
         if (this.collider) {
             this.collider.on(cc.Contact2DType.BEGIN_CONTACT, this.preSolve, this);
         }
@@ -107,34 +107,27 @@ export class EnemyWeaponScript extends cc.Component {
         if (this.curAttackTime == 0) this.canDamage = true;
 
         // enable collider when attacking
-        if (this.curAttackTime > 0) {
-            this.collider.enabled = true;
-        } else {
-            this.collider.enabled = false;
-        }
+        this.collider.enabled = this.curAttackTime > 0;
         this.collider.apply();
 
         // follow player
-        if (this.SoldierScript.facingright) {
+        if (this.soldierScript.facingRight) {
             this.node.setPosition(this.weaponRightX, this.weaponY);
         } else {
-            this.node.setPosition(this.SoldierScript.uiTransform.contentSize.width - this.weaponRightX, this.weaponY);
+            this.node.setPosition(this.soldierScript.uiTransform.width - this.weaponRightX, this.weaponY);
         }
 
         // attack
-        if (this.curAttackTime > 0) {
-            if (this.SoldierScript.facingright) this.rigidBody.angularVelocity = this.rotateStep;
-            if (!this.SoldierScript.facingright) this.rigidBody.angularVelocity = -this.rotateStep;
-            this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
-        } else {
-            this.rigidBody.angularVelocity = 0;
-            if (this.SoldierScript.facingright) this.node.setRotationFromEuler(0, 0, this.initialRotation);
-            if (!this.SoldierScript.facingright) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
-        }
+        let direction = this.soldierScript.facingRight? 1 : -1;
+        let progress = (this.curAttackTime == 0) ? 0 : 1 - this.curAttackTime / this.maxAttackTime;
+        this.node.setRotationFromEuler(0, 0, -direction * (this.initialRotation * (1 - progress) + this.finalRotation * progress));
+
+        // update cd
+        this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
+        this.curCdtime = Math.max(this.curCdtime - deltaTime, 0);
 
         // decide if attack
-        this.curCdtime = Math.max(this.curCdtime - deltaTime, 0);
-        if (this.curAttackTime == 0 && Math.abs(this.SoldierScript.distanceBetween) < this.attackRadius && this.curCdtime == 0 && !this.SoldierScript.isOutOfBound) {
+        if (this.curAttackTime == 0 && Math.abs(utils.getCenterDistance(this.soldier, this.player).x) < this.attackRadius && this.curCdtime == 0 && !this.soldierScript.isOutOfBound) {
             this.curAttackTime = this.maxAttackTime;
             this.curCdtime = this.attackCd;
         }

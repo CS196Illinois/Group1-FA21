@@ -11,7 +11,7 @@
     "6c48a": {
       "importer": "texture",
       "uuid": "44a041c3-0916-4b74-a552-4f74e35bd48d@6c48a",
-      "displayName": "weapon",
+      "displayName": "sword",
       "id": "6c48a",
       "name": "texture",
       "userData": {
@@ -34,7 +34,7 @@
     "f9941": {
       "importer": "sprite-frame",
       "uuid": "44a041c3-0916-4b74-a552-4f74e35bd48d@f9941",
-      "displayName": "weapon",
+      "displayName": "sword",
       "id": "f9941",
       "name": "spriteFrame",
       "userData": {

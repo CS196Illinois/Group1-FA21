@@ -1,5 +1,6 @@
 import * as cc from 'cc';
 import * as utils from 'db://assets/script/others/Utils';
+import { GameManager } from 'db://assets/script/managers/GameManager';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -16,6 +17,15 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass('MapController')
 export class MapController extends cc.Component {
+
+    onLoad() {
+        cc.resources.load("images/map/spriteFrame", cc.SpriteFrame, (err, spriteFrame) => {
+            let sprite = this.getComponent(cc.Sprite);
+            sprite.type = cc.Sprite.Type.TILED;
+            sprite.spriteFrame = spriteFrame;
+        });
+    }
+
     public getSize(): cc.Size {
         return this.getComponent(cc.UITransform).contentSize.clone();
     }

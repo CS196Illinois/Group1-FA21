@@ -6,7 +6,6 @@ import { Backpack } from 'db://assets/script/controllers/BackpackController';
 import { Weapon } from 'db://assets/script/others/Item';
 import { AttackPlayerEvent, AttackPlayerEventType } from 'db://assets/script/events/AttackPlayerEvent';
 import { HPChangeEvent, HPChangeEventType } from 'db://assets/script/events/HPChangeEvent';
-import { GameManager } from 'db://assets/script/managers/GameManager';
 import { SpriteController } from 'db://assets/script/controllers/SpriteController';
 const { ccclass, property } = cc._decorator;
 
@@ -27,7 +26,9 @@ export class PlayerController extends cc.Component {
     // useful components
     private rigidBody: cc.RigidBody2D;
     private collider: cc.Collider2D;
-    private uiTransform: cc.UITransform;
+    private _uiTransform: cc.UITransform;
+    public get uiTransform(): cc.UITransform { return this._uiTransform; }
+    private set uiTransform(value: cc.UITransform) { this._uiTransform = value; }
 
     // detect movement command
     public moveLeft: boolean;
@@ -38,9 +39,10 @@ export class PlayerController extends cc.Component {
     public set facingRight(value: boolean) {
         if (this._facingRight == value) return;
         this._facingRight = value;
+        // update image
         if (this.spriteController == null) return;
-        this.spriteController.padding.flipX();
         this.spriteController.flipX = !this._facingRight;
+        this.spriteController.padding.flipX();
         this.spriteController.apply();
     }
 
@@ -82,7 +84,6 @@ export class PlayerController extends cc.Component {
     private set backpack(value: Backpack) { this._backpack = value; }
 
     // sprite
-    private image: cc.SpriteFrame;
     public imageSize: cc.Size;
     private spriteNode: cc.Node;
     private spriteController: SpriteController;
@@ -137,19 +138,22 @@ export class PlayerController extends cc.Component {
         this.backpack.loadItems();
 
         // sprite
-        let gameManager = cc.find("GameManager").getComponent(GameManager);
-        this.image = gameManager.playerSpriteFrame;
         this.imageSize = new cc.Size(60, 60);
+        cc.resources.preload("images/player/spriteFrame");
         cc.resources.load("prefabs/Sprite", cc.Prefab, (err, spriteNode) => {
             // destroy own sprite
             this.node.getComponent(cc.Sprite)?.destroy();
             // add sprite child
+            this.facingRight = true;
             this.spriteNode = cc.instantiate(spriteNode);
             this.node.addChild(this.spriteNode);
             // update image
-            let sprite = this.spriteNode.getComponent(cc.Sprite);
-            sprite.type = cc.Sprite.Type.SIMPLE;
-            sprite.spriteFrame = this.image;
+            cc.resources.load("images/player/spriteFrame", cc.SpriteFrame, (err, spriteFrame) => {
+                this.facingRight = true;
+                let sprite = this.spriteNode.getComponent(cc.Sprite);
+                sprite.type = cc.Sprite.Type.SIMPLE;
+                sprite.spriteFrame = spriteFrame;
+            });
             // get sprite controller
             this.spriteController = this.spriteNode.getComponent(SpriteController);
             this.spriteController.padding = new utils.Padding(
