@@ -35,16 +35,38 @@ export class Padding extends cc.ValueType {
         this.bottom = bottom;
     }
 
-    equals(other: Padding): boolean {
-        return this.left == other.left && this.right == other.right && this.top == other.top && this.bottom == other.bottom;
-    }
+    toString(): string { return `[left=${this.left}, right=${this.right}, top=${this.top}, bottom=${this.bottom}]`; }
 
-    clone(): Padding {
-        return new Padding(this.left, this.right, this.top, this.bottom);
-    }
+    equals(other: Padding): boolean { return this.left == other.left && this.right == other.right && this.top == other.top && this.bottom == other.bottom; }
+
+    clone(): Padding { return new Padding(this.left, this.right, this.top, this.bottom); }
 
     static splitSize(size: cc.Size): Padding {
         return new Padding(size.width / 2, size.width / 2, size.height / 2, size.height / 2);
+    }
+
+    combineSize(): cc.Size {
+        return new cc.Size(this.left + this.right, this.top + this.bottom);
+    }
+
+    flipX() {
+        let temp = this.left;
+        this.left = this.right;
+        this.right = temp;
+    }
+
+    flipY() {
+        let temp = this.top;
+        this.top = this.bottom;
+        this.bottom = temp;
+    }
+
+    static flipX(padding: Padding) {
+        return new Padding(padding.right, padding.left, padding.top, padding.bottom);
+    }
+
+    static flipY(padding: Padding) {
+        return new Padding(padding.left, padding.right, padding.bottom, padding.top);
     }
 }
 
@@ -56,12 +78,41 @@ export function lerp2D(from: cc.Vec3, to: cc.Vec3, ratio: number): cc.Vec3 {
     return target;
 }
 
-export function getDirection(from: cc.Vec3, to: cc.Vec3) {
+export function getDirection(from: cc.Vec3, to: cc.Vec3): cc.Vec3{
     return new cc.Vec3(
         (from.x == to.x) ? 0 : ((from.x < to.x) ? 1 : -1),
         (from.y == to.y) ? 0 : ((from.y < to.y) ? 1 : -1),
         (from.z == to.z) ? 0 : ((from.z < to.z) ? 1 : -1)
     );
+}
+
+export function getUnitDirection(from: cc.Vec3, to: cc.Vec3): cc.Vec3 {
+    let result: cc.Vec3 = cc.Vec3.subtract(new cc.Vec3(), from, to);
+    result.z = 0;
+    if (result.equals(cc.Vec3.ZERO)) return result;
+    else return result.multiplyScalar(1 / result.length());
+}
+
+// Obtain the certain anchor point (default lowerleft corner) on an rectangular object
+export function getPoint(obj: cc.Node, anchor: cc.Vec2 = cc.Vec2.ZERO): cc.Vec3 {
+    let uiTransform = obj.getComponent(cc.UITransform);
+    return new cc.Vec3(
+        obj.position.x - uiTransform.width * (uiTransform.anchorX - anchor.x),
+        obj.position.y - uiTransform.height * (uiTransform.anchorX - anchor.x),
+        obj.position.z
+    );
+}
+
+export function getCenter(obj: cc.Node): cc.Vec3 {
+    return getPoint(obj, new cc.Vec2(0.5, 0.5));
+}
+
+export function getDistance(from: cc.Node, to: cc.Node): cc.Vec3 {
+    return cc.Vec3.subtract(new cc.Vec3(), getPoint(to), getPoint(from));
+}
+
+export function getCenterDistance(from: cc.Node, to: cc.Node): cc.Vec3 {
+    return cc.Vec3.subtract(new cc.Vec3(), getCenter(to), getCenter(from));
 }
 
 /**

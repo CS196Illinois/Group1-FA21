@@ -94,7 +94,7 @@ export class EnemyWeaponScript extends cc.Component {
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         if (otherCollider.node.name == "Player" && this.curAttackTime > 0 && this.canDamage) {
             this.canDamage = false;
-            let direction = utils.getDirection(otherCollider.node.position, this.node.parent.position).x;
+            let direction = utils.getDirection(utils.getCenter(this.node.parent), utils.getCenter(otherCollider.node)).x;
             otherCollider.getComponent(PlayerController).force = this.push * direction;
             EventManager.instance.emit("AttackPlayer", new AttackPlayerEvent(
                 AttackPlayerEventType.PHYSICAL_ATTACK, 20

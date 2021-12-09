@@ -5,6 +5,7 @@ import { DataCenter } from 'db://assets/script/managers/DataCenter';
 import { PlayerController } from 'db://assets/script/controllers/PlayerController';
 import { SlimeScript } from 'db://assets/script/controllers/SlimeScript';
 import { SoldierScript } from 'db://assets/script/controllers/SoldierScript';
+import { MapController } from 'db://assets/script/controllers/MapController';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -22,11 +23,13 @@ const { ccclass, property } = cc._decorator;
 @ccclass('GameManager')
 export class GameManager extends cc.Component {
     @property({ type: cc.SpriteFrame })
-    public terrainSpriteFrame: cc.SpriteFrame;
-    @property({ type: cc.SpriteFrame })
     public mapSpriteFrame: cc.SpriteFrame;
     @property({ type: cc.SpriteFrame })
+    public terrainSpriteFrame: cc.SpriteFrame;
+    @property({ type: cc.SpriteFrame })
     public playerSpriteFrame: cc.SpriteFrame;
+    @property({ type: cc.SpriteFrame })
+    public slimeSpriteFrame: cc.SpriteFrame;
 
     private eventId: number = null;
 
@@ -91,8 +94,6 @@ export class GameManager extends cc.Component {
 
         // specific configurations for player
         player.addComponent(PlayerController);
-        let playerSprite = player.getComponent(cc.Sprite);
-        playerSprite.spriteFrame = this.playerSpriteFrame;
 
         // specific configurations for terrain
         terrain.children.forEach(node => {
@@ -119,6 +120,7 @@ export class GameManager extends cc.Component {
         npc.children.forEach(node => {});
 
         // map configurations
+        map.addComponent(MapController);
         let mapSprite = map.getComponent(cc.Sprite);
         mapSprite.type = cc.Sprite.Type.TILED;
         mapSprite.spriteFrame = this.mapSpriteFrame;

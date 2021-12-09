@@ -3,6 +3,8 @@ import { AttackPlayerEvent, AttackPlayerEventType } from 'db://assets/script/eve
 import { EventManager } from 'db://assets/script/events/EventManager';
 import { PlayerController } from 'db://assets/script/controllers/PlayerController';
 import * as utils from 'db://assets/script/others/Utils';
+import { GameManager } from 'db://assets/script/managers/GameManager';
+import { SpriteController } from 'db://assets/script/controllers/SpriteController';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -39,7 +41,8 @@ export class SlimeScript extends cc.Component {
     uiTransform: cc.UITransform;
 
     // sprint
-    sprintToRight: boolean;
+    facingRight: boolean;
+
     sprintStep: number;
     curSprintTime: number;
     maxSprintTime: number;
@@ -58,6 +61,11 @@ export class SlimeScript extends cc.Component {
     forceResist: number;
     forceDecay: number;
 
+    // Image of the slime
+    spriteNode: cc.Node;
+    spriteController: SpriteController;
+    image: cc.SpriteFrame;
+
 
     onLoad() {
         this.player = cc.find("Canvas/Map/Player");
@@ -72,7 +80,8 @@ export class SlimeScript extends cc.Component {
         this.collider = this.getComponent(cc.Collider2D);
         this.uiTransform = this.getComponent(cc.UITransform);
 
-        this.sprintToRight = true;
+        this.facingRight = true;
+
         this.sprintStep = 25;
         this.curSprintTime = 0;
         this.maxSprintTime = 0.7;
@@ -88,6 +97,22 @@ export class SlimeScript extends cc.Component {
         this.force = 0;
         this.forceResist = 0.8;
         this.forceDecay = 120;
+
+        let gameManager = cc.find("GameManager").getComponent(GameManager);
+        this.image = gameManager.slimeSpriteFrame;
+        cc.resources.load("prefabs/Sprite", cc.Prefab, (err, spriteNode) => {
+            // destroy own sprite
+            this.node.getComponent(cc.Sprite)?.destroy();
+            // add sprite child
+            this.spriteNode = cc.instantiate(spriteNode);
+            this.node.addChild(this.spriteNode);
+            // update image
+            let sprite = this.spriteNode.getComponent(cc.Sprite);
+            sprite.type = cc.Sprite.Type.SIMPLE;
+            sprite.spriteFrame = this.image;
+            // get sprite controller
+            this.spriteController = this.spriteNode.getComponent(SpriteController);
+        });
     }
 
     start () {
@@ -104,41 +129,51 @@ export class SlimeScript extends cc.Component {
                     AttackPlayerEventType.PHYSICAL_ATTACK, 10
                 ));
                 // set attack cooldown
-                this.curDamageCD = this.damageCD
+                this.curDamageCD = this.damageCD;
             }
             // push player if is currently sprinting
             if (this.curSprintTime > 0) {
-                let direction = utils.getDirection(otherCollider.node.position, this.node.parent.position).x;
-                otherCollider.getComponent(PlayerController).force = this.push * direction;
+                otherCollider.getComponent(PlayerController).force = this.push * (this.facingRight? 1 : -1);
             }
             // reset sprint time
             this.curSprintTime = 0;
         }
     }
 
-    resetCurSprintCD () {
+    updateDirection() {
+        // always face the player
+        this.facingRight = utils.getCenterDistance(this.node, this.player).x > 0;
+        // update image
+        if (this.spriteController != null) {
+            if (this.facingRight) {
+                this.spriteController.flipX = false;
+            } else {
+                this.spriteController.flipX = true;
+            }
+            this.spriteController.apply();
+        }
+    }
+
+    resetCurSprintCD() {
         this.curSprintCD = Math.min(this.curSprintCD + 0.5, this.sprintCD);
     }
 
     update (deltaTime: number) {
         let velocity: cc.Vec2 = this.rigidBody.linearVelocity;
-        let playerwidth: number = this.player.getComponent(cc.UITransform).contentSize.width;
-        let enemywidth: number = this.uiTransform.contentSize.width;
-        let distanceBetween: number = (this.player.position.x + playerwidth / 2) - (this.node.position.x + enemywidth / 2);
-        let verticalDistance: number = Math.abs(this.player.position.y - this.node.position.y);
-        let horizontalDistance: number = Math.abs(this.player.position.x - this.node.position.x);
+        let distanceBetween: number = utils.getCenterDistance(this.node, this.player).x;
+        let distance: cc.Vec3 = utils.getDistance(this.node, this.player);
 
         // update cooldowns
         this.curSprintCD = Math.max(this.curSprintCD - deltaTime, 0);
         this.curDamageCD = Math.max(this.curDamageCD - deltaTime, 0);
 
-        // check if sprint
-        if (Math.abs(distanceBetween) < this.attackDistance && this.curSprintTime == 0 && this.curSprintCD == 0 && verticalDistance < this.maxVerticalDistance) {
-            if (distanceBetween > 0) {
-                this.sprintToRight = true;
-            } else {
-                this.sprintToRight = false;
-            }
+        // update directions if not sprinting
+        if (this.curSprintTime == 0) {
+            this.updateDirection();
+        }
+
+        // check if should sprint
+        if (Math.abs(distanceBetween) < this.attackDistance && this.curSprintTime == 0 && this.curSprintCD == 0 && Math.abs(distance.y) < this.maxVerticalDistance) {
             this.curSprintTime = this.maxSprintTime;
             this.curSprintCD = this.sprintCD;
             // Jump
@@ -147,14 +182,10 @@ export class SlimeScript extends cc.Component {
 
         if (this.curSprintTime > 0) {
             // Sprinting
-            if (this.sprintToRight) {
-                velocity.x = this.sprintStep
-            } else {
-                velocity.x = - this.sprintStep;
-            }
+            velocity.x = this.sprintStep * (this.facingRight ? 1 : -1);
             // Calculate remaining sprint time
             this.curSprintTime = Math.max(this.curSprintTime - deltaTime, 0);
-        } else if (verticalDistance > this.maxVerticalDistance || horizontalDistance > this.maxHorizontalDistance) {
+        } else if (Math.abs(distance.y) > this.maxVerticalDistance || Math.abs(distance.x) > this.maxHorizontalDistance) {
             // Don't move if does not detect player
             velocity.x = 0;
         } else {

@@ -91,19 +91,23 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "terrainSpriteFrame": {
-      "__uuid__": "e8314bd8-917c-41ab-bb61-546a7a3bee8c@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
     "mapSpriteFrame": {
       "__uuid__": "56af7ba5-10d3-4299-af88-22d846f0d953@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "terrainSpriteFrame": {
+      "__uuid__": "e8314bd8-917c-41ab-bb61-546a7a3bee8c@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "playerSpriteFrame": {
       "__uuid__": "ef06e435-c6a1-4ec6-8758-fb1f995d2d3a@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
-    "_id": "82zMZz+pFBC4bbyYHJwG6j"
+    "slimeSpriteFrame": {
+      "__uuid__": "b38e027e-837d-4e62-8fbd-f2f95cbef9a6@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "_id": "003AC210BDDr+twYvyFHno"
   },
   {
     "__type__": "cc.Node",
@@ -332,7 +336,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 707.5461741424803,
+    "_orthoHeight": 360,
     "_near": 1,
     "_far": 2000,
     "_color": {

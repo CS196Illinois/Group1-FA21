@@ -13,7 +13,7 @@ const { ccclass, property } = cc._decorator;
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
- 
+
 @ccclass('MapController')
 export class MapController extends cc.Component {
     public getSize(): cc.Size {

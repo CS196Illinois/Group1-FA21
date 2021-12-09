@@ -14,7 +14,7 @@ const { ccclass, property } = cc._decorator;
  * ManualUrl = https://docs.cocos.com/creator/3.3/manual/en/
  *
  */
- 
+
 @ccclass('CameraMovement')
 export class CameraMovement extends cc.Component {
     private map: cc.Node;

@@ -1,12 +1,14 @@
 import * as cc from 'cc';
-const { ccclass, property } = cc._decorator;
-
+import * as utils from 'db://assets/script/others/Utils';
 import { LoadSceneEvent, LoadSceneEventType } from 'db://assets/script/events/LoadSceneEvent';
-import * as e from 'db://assets/script/events/EventManager';
+import { EventManager } from 'db://assets/script/events/EventManager';
 import { Backpack } from 'db://assets/script/controllers/BackpackController';
 import { Weapon } from 'db://assets/script/others/Item';
 import { AttackPlayerEvent, AttackPlayerEventType } from 'db://assets/script/events/AttackPlayerEvent';
 import { HPChangeEvent, HPChangeEventType } from 'db://assets/script/events/HPChangeEvent';
+import { GameManager } from 'db://assets/script/managers/GameManager';
+import { SpriteController } from 'db://assets/script/controllers/SpriteController';
+const { ccclass, property } = cc._decorator;
 
 /**
  * Predefined variables
@@ -31,7 +33,16 @@ export class PlayerController extends cc.Component {
     public moveLeft: boolean;
     public moveRight: boolean;
     public jump: boolean;
-    public facingright: boolean;
+    private _facingRight: boolean;
+    public get facingRight(): boolean { return this._facingRight; }
+    public set facingRight(value: boolean) {
+        if (this._facingRight == value) return;
+        this._facingRight = value;
+        if (this.spriteController == null) return;
+        this.spriteController.padding.flipX();
+        this.spriteController.flipX = !this._facingRight;
+        this.spriteController.apply();
+    }
 
     // number of consecutive jumps (while in air)
     public curJumpNum: number;
@@ -70,6 +81,12 @@ export class PlayerController extends cc.Component {
     public get backpack(): Backpack { return this._backpack; }
     private set backpack(value: Backpack) { this._backpack = value; }
 
+    // sprite
+    private image: cc.SpriteFrame;
+    public imageSize: cc.Size;
+    private spriteNode: cc.Node;
+    private spriteController: SpriteController;
+
     // weapon
     private _weapon: cc.Node;
     public get weapon(): cc.Node { return this._weapon; }
@@ -87,7 +104,7 @@ export class PlayerController extends cc.Component {
         this.moveLeft = false;
         this.moveRight = false;
         this.jump = false;
-        this.facingright = true;
+        this.facingRight = true;
 
         this.curJumpNum = 0;
         this.maxJumpNum = 1;
@@ -119,6 +136,31 @@ export class PlayerController extends cc.Component {
         this.backpack = new Backpack();
         this.backpack.loadItems();
 
+        // sprite
+        let gameManager = cc.find("GameManager").getComponent(GameManager);
+        this.image = gameManager.playerSpriteFrame;
+        this.imageSize = new cc.Size(60, 60);
+        cc.resources.load("prefabs/Sprite", cc.Prefab, (err, spriteNode) => {
+            // destroy own sprite
+            this.node.getComponent(cc.Sprite)?.destroy();
+            // add sprite child
+            this.spriteNode = cc.instantiate(spriteNode);
+            this.node.addChild(this.spriteNode);
+            // update image
+            let sprite = this.spriteNode.getComponent(cc.Sprite);
+            sprite.type = cc.Sprite.Type.SIMPLE;
+            sprite.spriteFrame = this.image;
+            // get sprite controller
+            this.spriteController = this.spriteNode.getComponent(SpriteController);
+            this.spriteController.padding = new utils.Padding(
+                this.uiTransform.width - this.imageSize.width,
+                this.uiTransform.height - this.imageSize.height,
+                0,
+                0
+            );
+            this.spriteController.apply();
+        });
+
         // weapon
         let weaponItem = new Weapon("weapon", "Weapon");  // TODO: use weapon info from the data center
         cc.resources.load("prefabs/" + weaponItem.prefab, cc.Prefab, (err, weapon) => {
@@ -140,20 +182,20 @@ export class PlayerController extends cc.Component {
         // add a key up listener
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         // add a collision listener (invoke callback after collision is solved)
-        this.eventId = e.EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event));
+        this.eventId = EventManager.instance.on("AttackPlayer", (event: AttackPlayerEvent) => this.onAttack(event));
         if (this.collider) {
             this.collider.on(cc.Contact2DType.POST_SOLVE, this.onPostSolve, this);
         }
     }
 
     onDestroy () {
-        e.EventManager.instance.off("AttackPlayer", this.eventId);
+        EventManager.instance.off("AttackPlayer", this.eventId);
     }
 
     onAttack (event: AttackPlayerEvent) {
         if (event.type == AttackPlayerEventType.PHYSICAL_ATTACK) {
             this.hp = Math.max(this.hp - event.attack, 0);
-            e.EventManager.instance.emit("hp-change", new HPChangeEvent(
+            EventManager.instance.emit("hp-change", new HPChangeEvent(
                 HPChangeEventType.HP_CHANGE, this.hp
             ));
         }
@@ -167,7 +209,7 @@ export class PlayerController extends cc.Component {
                 // find the number pressed
                 var number = event.keyCode + 1 - cc.KeyCode.DIGIT_1;
                 // example of how to emit a LoadSceneEvent
-                e.EventManager.instance.emit("LoadScene", new LoadSceneEvent(
+                EventManager.instance.emit("LoadScene", new LoadSceneEvent(
                     LoadSceneEventType.LOAD_GAME_SCENE, "Scene" + number
                 ));
                 break;
@@ -179,11 +221,11 @@ export class PlayerController extends cc.Component {
                 break;
             case this.keyLeft:
                 this.moveLeft = true;
-                this.facingright = false;
+                this.facingRight = false;
                 break;
             case this.keyRight:
                 this.moveRight = true;
-                this.facingright = true;
+                this.facingRight = true;
                 break;
             case this.keySprint:
                 if (!this.allowSprint) {
@@ -193,7 +235,7 @@ export class PlayerController extends cc.Component {
                 if (this.curSprintCD == 0 && this.rigidBody.linearVelocity.x != 0) {
                     this.curSprintTime = this.sprintTime;
                     this.curSprintCD = this.sprintCD;
-                    this.sprintDirection = this.facingright ? 1 : -1;
+                    this.sprintDirection = this.facingRight ? 1 : -1;
                 }
                 break;
         }

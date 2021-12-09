@@ -1,8 +1,8 @@
 import * as cc from 'cc';
+import * as utils from 'db://assets/script/others/Utils';
 import { PlayerController } from 'db://assets/script/controllers/PlayerController';
 import { SlimeScript } from 'db://assets/script/controllers/SlimeScript';
 import { SoldierScript } from 'db://assets/script/controllers/SoldierScript';
-import * as utils from 'db://assets/script/others/Utils';
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -94,15 +94,15 @@ export class WeaponScript extends cc.Component {
 
     preSolve (selfCollider: cc.Collider2D, otherCollider: cc.Collider2D, contact: cc.IPhysics2DContact) {
         if (this.curAttackTime == 0) {
-            return
+            return;
         } else if (otherCollider.node.parent.name == "Slime") {
             let slimeScript = otherCollider.getComponent(SlimeScript);
-            let direction = utils.getDirection(otherCollider.node.position, this.node.parent.position).x;
+            let direction = utils.getDirection(utils.getCenter(this.node.parent), utils.getCenter(otherCollider.node)).x;
             slimeScript.force = this.push / slimeScript.forceResist * direction;
             slimeScript.resetCurSprintCD();
         } else if (otherCollider.node.parent.name == "Soldier") {
             let soldierScript = otherCollider.getComponent(SoldierScript);
-            let direction = utils.getDirection(otherCollider.node.position, this.node.parent.position).x;
+            let direction = utils.getDirection(utils.getCenter(this.node.parent), utils.getCenter(otherCollider.node)).x;
             soldierScript.force = this.push / soldierScript.forceResist * direction;
         }
     }
@@ -117,7 +117,7 @@ export class WeaponScript extends cc.Component {
         this.collider.apply();
 
         // follow player
-        if (this.playerController.facingright) {
+        if (this.playerController.facingRight) {
             this.node.setPosition(this.weaponRightX, this.weaponY);
         } else {
             this.node.setPosition(this.playerController.getComponent(cc.UITransform).contentSize.width - this.weaponRightX, this.weaponY);
@@ -125,13 +125,13 @@ export class WeaponScript extends cc.Component {
 
         // attack
         if (this.curAttackTime > 0) {
-            if (this.playerController.facingright) this.rigidBody.angularVelocity = this.rotateStep;
-            if (!this.playerController.facingright) this.rigidBody.angularVelocity = -this.rotateStep;
+            if (this.playerController.facingRight) this.rigidBody.angularVelocity = this.rotateStep;
+            if (!this.playerController.facingRight) this.rigidBody.angularVelocity = -this.rotateStep;
             this.curAttackTime = Math.max(this.curAttackTime - deltaTime, 0);
         } else {
             this.rigidBody.angularVelocity = 0;
-            if (this.playerController.facingright) this.node.setRotationFromEuler(0, 0, this.initialRotation);
-            if (!this.playerController.facingright) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
+            if (this.playerController.facingRight) this.node.setRotationFromEuler(0, 0, this.initialRotation);
+            if (!this.playerController.facingRight) this.node.setRotationFromEuler(0, 0, -this.initialRotation);
         }
     }
 }
